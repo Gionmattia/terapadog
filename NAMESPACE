@@ -1,0 +1,13 @@
+export("terapadog")
+export("prepareTerapadogData")
+export("get_FCs")
+import("DESeq2")
+importFrom("KEGGREST", "keggLink", "keggList")
+importFrom("doParallel", "registerDoParallel")
+importFrom("stats", "na.omit", "quantile", "sd", "var")
+importFrom("dplyr", "%>%", "select", "filter", "left_join")
+importFrom("utils", "combn", "read.table")
+importFrom("doRNG", "%dorng%")
+importFrom("foreach", "foreach")
+
+

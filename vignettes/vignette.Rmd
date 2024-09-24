@@ -1,0 +1,98 @@
+---
+title: "Translational Efficiency Regulation Analysis & Pathway Analysis with Down-weighting of Overlapping Genes (TERAPADOG)"
+author: "Gionmattia Carancini"
+date: "`r Sys.Date()`"
+output: BiocStyle::html_document
+vignette: >
+  %\VignetteIndexEntry{terapadog: Translational Efficiency Regulation Analysis}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+# Introduction
+Welcome to the official (and only) documentation about TERAPADOG 
+(***T**ranslational **E**fficiency **R**egulation **A**nalysis & **P**athway 
+**A**nalysis with **D**own-weighting of **O**verlapping **G**enes*).
+
+### What is TERAPADOG?
+
+To put is short, TERAPADOG is an implementation of the classic PADOG aglorithm
+(Pathway Analysis with Down-weighting of Overlapping Genes), 
+but on top of the results of a Differential Translational Analysis executed 
+with DeltaTE.
+
+### Differential Translation-what?
+
+In the last decade, technologies like Polysome profiling (Polysome-Seq) and 
+Ribosome profiling (Ribo-Seq) have shown that gene expression can be regulated 
+at the translational level (through the modulation of Translational Efficiency,
+TE), rather than only at the transcriptional level (through the 
+increase/decrease of a specific mRNA's levels).
+
+As a results of this, many packages have been developed to study gene regulation 
+not only at the transcriptional level, but also translational. The results of 
+these analyses are usually in the form of gene lists, where each gene is 
+assigned a regulatory mode in regards of the changes in its mRNA level and 
+Translational Efficiency (TE).
+
+### The implementation with PADOG
+
+Usually, results as a set of genes (especially if numerous) can be quite 
+unintuitive to interpret. A possible strategy is to contextualize this 
+information on biological pathways, so to have a more overarching perspective on
+the processes that are being actively regulated through translation efficiency.
+
+It is from this idea that TERAPADOG was conceived: to be able to perform a gene 
+set analysis on the sets highlighted as being actively under Translational 
+Efficiency changes. 
+
+### The bigger picture: integration within ReactomeGSA
+
+While TERAPADOG can be run as a tool on its own (as shown in this vignette), it 
+is also conceived to be an additional analysis method to the ReactomeGSA package,
+where the results of the analysis can be categorized into Regulatory Modes based
+on their changes in TE and visualized on biological pathways thanks to Reactome's
+tools and sources.
+
+That is to say, TERAPADOG on its own allows the user to study genes that are 
+undergoing changes in their TE.
+In its integration with the ReactomeGSA things are pushed further, giving the 
+user a more comprehensive picture that also encompasses the directionality of
+the change (in mRNA or TE) and the possible regulatory modes arising from the
+combination of the two.
+
+### Additional Reading
+
+For more information regarding PADOG or DeltaTE and regulatory modes, please
+refer to the paper mentioned in the references section
+
+# Installation
+
+To install the terapadog package, execute the following code:
+
+```{r install, echo = TRUE, eval=FALSE}
+if (!require("BiocManager", quietly = TRUE))
+    install.packages("BiocManager")
+
+BiocManager::install("TERAPADOG")
+```
+# Package Structure
+
+# Walktrough 
+
+## Preparing the input data
+
+## Executing the analysis
+
+## Saving the results
+
+## Add script to get the gene FC and assign a RegMode?
+
+# References
+
+# SessionInfo
+
+```{r session-info, echo = FALSE}
+# Displays the session information
+sessionInfo()
+```
