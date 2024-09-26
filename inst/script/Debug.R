@@ -19,11 +19,11 @@ resultsss <- get_FCs(expression.data, exp_de)
 # Debug: testing terapadog itself
 
 #load gene.indices
-load("~/Desktop/terapadog/data/gene_identifier_set.Rda")
+load("~/Desktop/terapadog/data/gene_identifier_set.Rdata")
 
 is_paired <- FALSE
 
-res <- terapadog(esetm = expression.data, exp_de = exp_de,
-                 gslist = gene_identifier_set, paired = is_paired, NI = 1000, Nmin = 0)
+res <- terapadog(esetm = expression.data, exp_de = exp_de, paired = is_paired,
+                 NI = 1000, Nmin = 0)
 
 test <- as.character(unlist(gene.indices))

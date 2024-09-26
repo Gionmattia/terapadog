@@ -1,6 +1,10 @@
 ---
 title: "Translational Efficiency Regulation Analysis & Pathway Analysis with Down-weighting of Overlapping Genes (TERAPADOG)"
-author: "Gionmattia Carancini"
+author: 
+- name: "Gionmattia Carancini"
+  affiliation:
+  - "CRT Genomics Data Sceince"
+  - "LAPTILab, Uninversity College Cork, Ireland"
 date: "`r Sys.Date()`"
 output: BiocStyle::html_document
 vignette: >
@@ -9,7 +13,14 @@ vignette: >
   %\VignetteEncoding{UTF-8}
 ---
 
+&nbsp;
+
+
+*Per Nonna Ezia, arrivederci e grazie di tutti i dolci.*
+
 # Introduction
+
+
 Welcome to the official (and only) documentation about TERAPADOG 
 (***T**ranslational **E**fficiency **R**egulation **A**nalysis & **P**athway 
 **A**nalysis with **D**own-weighting of **O**verlapping **G**enes*).
@@ -20,6 +31,8 @@ To put is short, TERAPADOG is an implementation of the classic PADOG aglorithm
 (Pathway Analysis with Down-weighting of Overlapping Genes), 
 but on top of the results of a Differential Translational Analysis executed 
 with DeltaTE.
+
+Works on human only!
 
 ### Differential Translation-what?
 

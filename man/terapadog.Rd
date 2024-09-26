@@ -35,9 +35,9 @@ prepareTerapadogData.R.}
 If it does, be sure that the pairs are specified in the "Block" column of the
 exp_de dataframe.}
 
-\item{gslist}{A collection of named lists. Each list is named after a KEGG
-pathway, while the strings inside are the ENSEMBL gene ID for those genes
-that are part of said pathway.}
+\item{gslist}{A list of named character vectors. Each vector is named after a
+KEGG pathway ID and each element within the vector is an ENSEMBL gene ID for
+a gene part of said pathway.}
 
 \item{organism}{A three letter string giving the name of the organism
 supported by the "KEGGREST" package.}
