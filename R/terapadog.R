@@ -33,6 +33,8 @@
 #' @return A dataframe with the PADOG score for each pathway in exam.
 #' @export
 #'
+#' @example
+#'
 terapadog2 <- function (esetm = NULL, exp_de = NULL, paired = FALSE,
                        gslist = "KEGGRESTpathway", organism = "hsa" ,
                        gs.names = NULL, NI = 1000, Nmin = 3, verbose = TRUE,
