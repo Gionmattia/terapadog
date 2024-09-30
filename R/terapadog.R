@@ -33,8 +33,8 @@
 #' @return A dataframe with the PADOG score for each pathway in exam.
 #' @export
 #'
-terapadog <- function (esetm = NULL, exp_de = NULL, paired = FALSE,
-                       gslist = "KEGGRESTpathway", organism = "hsa",
+terapadog2 <- function (esetm = NULL, exp_de = NULL, paired = FALSE,
+                       gslist = "KEGGRESTpathway", organism = "hsa" ,
                        gs.names = NULL, NI = 1000, Nmin = 3, verbose = TRUE,
                        parallel = FALSE, dseed = NULL, ncr = NULL) {
 
@@ -43,14 +43,12 @@ terapadog <- function (esetm = NULL, exp_de = NULL, paired = FALSE,
   if (length(gslist) == 1 && gslist == "KEGGRESTpathway") {
     stopifnot(nchar(organism) == 3)
     res <- keggLink("pathway", organism)
-    a <- data.frame(path = gsub(paste0("path:", organism),
-                                "", res), gns = gsub(paste0(organism, ":"),
-                                                     "", names(res)))
+    a <- data.frame(path = gsub(paste0("path:", organism),"", res),
+                    gns = gsub(paste0(organism, ":"),"", names(res)))
     gslist <- tapply(a$gns, a$path, function(x) {
       as.character(x)
     })
-    gs.names <- keggList("pathway", organism)[paste0("path:",
-                                                     organism, names(gslist))]
+    gs.names <- keggList("pathway", organism)[paste0(organism, names(gslist))]
     names(gs.names) <- names(gslist)
     stopifnot(length(gslist) >= 3)
     rm(res, a)

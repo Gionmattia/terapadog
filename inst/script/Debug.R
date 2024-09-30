@@ -5,6 +5,7 @@ path_to_metadata <- "~/Desktop/terapadog/inst/extdata/sample_info.tsv"
 analysis.group.1 <- "1"
 analysis.group.2 <- "2"
 
+
 dats <- prepareTerapadogData(path_to_RNA_counts, path_to_RIBO_counts,
                              path_to_metadata,
                              analysis.group.1, analysis.group.2)
@@ -12,18 +13,39 @@ dats <- prepareTerapadogData(path_to_RNA_counts, path_to_RIBO_counts,
 expression.data <- dats$expression.data
 exp_de <- dats$exp_de
 
-# Debug: testing get_FCs
-
-resultsss <- get_FCs(expression.data, exp_de)
-
 # Debug: testing terapadog itself
 
 #load gene.indices
-load("~/Desktop/terapadog/data/gene_identifier_set.Rdata")
+#load("~/Desktop/terapadog/data/gene_identifier_set.Rdata")
+
+expression.data <- id_converter(expression.data, "ensembl_gene_id")
 
 is_paired <- FALSE
 
-res <- terapadog(esetm = expression.data, exp_de = exp_de, paired = is_paired,
-                 NI = 1000, Nmin = 0)
+res <- terapadog2(esetm = expression.data, exp_de = exp_de, paired = is_paired,NI = 1000, Nmin = 0)
 
-test <- as.character(unlist(gene.indices))
+# Troubleshooting old code.
+res <- keggLink("pathway", "hsa")
+a <- data.frame(path = gsub(paste0("path:", "hsa"),"", res),
+                gns = gsub(paste0("hsa", ":"),"", names(res)))
+gslist <- tapply(a$gns, a$path, function(x) {
+  as.character(x)
+})
+gs.names <- keggList("pathway", "hsa")[paste0("hsa", names(gslist))]
+names(gs.names) <- names(gslist)
+
+# So this should solve the issue and allow the use of... "no gene.indices" in the
+
+
+## OLD VERSION
+
+res <- keggLink("pathway", organism)
+a <- data.frame(path = gsub(paste0("path:", organism),
+                            "", res), gns = gsub(paste0(organism, ":"),
+                                                 "", names(res)))
+gslist <- tapply(a$gns, a$path, function(x) {
+  as.character(x)
+})
+gs.names <- keggList("pathway", organism)[paste0("path:",
+                                                 organism, names(gslist))]
+names(gs.names) <- names(gslist)
