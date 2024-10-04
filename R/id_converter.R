@@ -6,7 +6,8 @@
 
 #' Convert the gene identifier to entrezgene_id format for the analysis.
 #' Works on human only!
-#'
+#' @importFrom biomaRt useMart getBM
+#' @importFrom stats setNames
 #' @param esetm A dataframe with the gene count values.
 #' @param id_type A string representing the type of ID given as input. Must be
 #' either hgnc_symbol or ensembl_gene_id.
@@ -22,13 +23,13 @@ id_converter <- function(esetm, id_type) {
   }
 
   # Use the Ensembl database
-  mart <- useMart("ensembl", dataset = "hsapiens_gene_ensembl")
+  mart <- biomaRt::useMart("ensembl", dataset = "hsapiens_gene_ensembl")
 
   # The IDs to map are the row names of esetm
   ids <- rownames(esetm)
 
   # Get the mapping between the given IDs and Entrez Gene IDs
-  gene_mapping <- getBM(
+  gene_mapping <- biomaRt::getBM(
     filters = id_type,
     attributes = c(id_type, "entrezgene_id"),
     values = ids,
@@ -36,7 +37,7 @@ id_converter <- function(esetm, id_type) {
   )
 
   # Create a named vector for mapping
-  id_to_entrez <- setNames(gene_mapping$entrezgene_id, gene_mapping[[id_type]])
+  id_to_entrez <- stats::setNames(gene_mapping$entrezgene_id, gene_mapping[[id_type]])
 
   # Map the IDs in esetm to Entrez IDs
   entrez_ids <- id_to_entrez[rownames(esetm)]
@@ -52,8 +53,4 @@ id_converter <- function(esetm, id_type) {
 
   return(esetm)
 }
-
-# tested conversion from both allowed cases and negative control.
-# Seems to work
-
 

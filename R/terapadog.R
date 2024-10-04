@@ -4,7 +4,12 @@
 #' This function reads RNA and RIBO count files, checks input data validity and
 #'  merges them into a single numerical matrix (expression.data.
 #'  It also prepares the metatadata needed by padog (exp_de).
-#'
+#' @importFrom KEGGREST keggLink keggList
+#' @importFrom DESeq2 DESeqDataSetFromMatrix DESeq results
+#' @importFrom foreach foreach
+#' @importFrom doRNG %dorng%
+#' @importFrom utils combn
+#' @importFrom stats var quantile sd na.omit
 #' @param esetm A matrix containing the counts from RNA and RIBO samples.
 #' Rownames must be ensembl GENEIDs, while column names must be sample names.
 #' Refer to prepareTerapadogData.R to prepare input data.
@@ -44,13 +49,13 @@ terapadog2 <- function (esetm = NULL, exp_de = NULL, paired = FALSE,
   # Initial checks on the data (as PADOG would do). Some have been modified/removed to fit new kind of data.
   if (length(gslist) == 1 && gslist == "KEGGRESTpathway") {
     stopifnot(nchar(organism) == 3)
-    res <- keggLink("pathway", organism)
+    res <- KEGGREST::keggLink("pathway", organism)
     a <- data.frame(path = gsub(paste0("path:", organism),"", res),
                     gns = gsub(paste0(organism, ":"),"", names(res)))
     gslist <- tapply(a$gns, a$path, function(x) {
       as.character(x)
     })
-    gs.names <- keggList("pathway", organism)[paste0(organism, names(gslist))]
+    gs.names <- KEGGREST::keggList("pathway", organism)[paste0(organism, names(gslist))]
     names(gs.names) <- names(gslist)
     stopifnot(length(gslist) >= 3)
     rm(res, a)
@@ -70,9 +75,9 @@ terapadog2 <- function (esetm = NULL, exp_de = NULL, paired = FALSE,
 
   # Initial operations on the gene set lists. Unchanged from PADOG.
   gf <- table(unlist(gslist))
-  if (!(var(gf) == 0)) {
-    if (quantile(gf, 0.99) > mean(gf) + 3 * sd(gf)) {
-      gf[gf > quantile(gf, 0.99)] <- quantile(gf, 0.99)
+  if (!(stats::var(gf) == 0)) {
+    if (stats::quantile(gf, 0.99) > mean(gf) + 3 * stats::sd(gf)) {
+      gf[gf > stats::quantile(gf, 0.99)] <- stats::quantile(gf, 0.99)
     }
     gff <- function(x) {
       1 + ((max(x) - x)/(max(x) - min(x)))^0.5
@@ -156,7 +161,7 @@ terapadog2 <- function (esetm = NULL, exp_de = NULL, paired = FALSE,
     }
     else {
       dup <- which(g == minG)
-      cms <- combn(length(g), tab[minG])
+      cms <- utils::combn(length(g), tab[minG])
       del <- apply(cms, 2, setequal, dup)
       if (paired) {
         cms <- cms[, order(del, decreasing = TRUE), drop = FALSE]
@@ -250,17 +255,17 @@ terapadog2 <- function (esetm = NULL, exp_de = NULL, paired = FALSE,
     }
 
     # Setup the ddsMat object
-    ddsMat <- DESeqDataSetFromMatrix(
+    ddsMat <- DESeq2::DESeqDataSetFromMatrix(
       countData = esetm,
       colData = exp_de,
       design = design_TE
     )
 
     # Calculate results (without printing messages on console)
-    ddsMat <- suppressMessages(DESeq(ddsMat))
+    ddsMat <- suppressMessages(DESeq2::DESeq(ddsMat))
 
     # Extract specific comparison of interest
-    res <- results(ddsMat, name = "Groupd.SeqTypeRIBO")
+    res <- DESeq2::results(ddsMat, name = "Groupd.SeqTypeRIBO")
 
     # originally, moderated t-values (abs value) were retrived and stored in a df.
     # Now it just extracts adjusted p-values.
@@ -273,7 +278,7 @@ terapadog2 <- function (esetm = NULL, exp_de = NULL, paired = FALSE,
     degf <- degf[deINgs, , drop = FALSE]
 
     sapply(gslistINesetm, function(z) {
-      X <- na.omit(degf[z, , drop = FALSE])
+      X <- stats::na.omit(degf[z, , drop = FALSE])
       colMeans(X, na.rm = TRUE) * sqrt(nrow(X))
     })
   }
@@ -291,7 +296,7 @@ terapadog2 <- function (esetm = NULL, exp_de = NULL, paired = FALSE,
     }
     doParallel::registerDoParallel(clust)
     tryCatch({
-      parRes <- foreach(ite = 1:(NI + 1), .combine = "c",
+      parRes <- foreach::foreach(ite = 1:(NI + 1), .combine = "c",
                         .packages = "DESeq2") %dorng% { # original: .packages = "limma"
                           Sres <- gsScoreFun(G, block)
                           tmp <- list(t(Sres))

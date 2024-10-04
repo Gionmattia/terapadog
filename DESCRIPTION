@@ -19,7 +19,7 @@ License: GPL-2
 Encoding: UTF-8
 LazyData: TRUE
 Imports: DESeq2, KEGGREST, doParallel, stats, utils, foreach, doRNG, dplyr, plotly, htmlwidgets, biomaRt
-Suggests: knitr
+Suggests: BiocStyle, knitr
 Collate: preprocessing_helpers.R id_converter.R prepareTerapadogData.R terapadog.R get_FCs.R assign_Regmode.R PlotDTA.R 
 BiocViews: RiboSeq, Transcriptomics, GeneSetEnrichment, GeneRegulation, 
     Reactome, Software

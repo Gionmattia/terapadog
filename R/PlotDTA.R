@@ -4,6 +4,9 @@
 #' That is to say, a plot of the genes undergoing translational regulation,
 #' coloured by RegMode.
 #' Genes whose RegMode was Undeterminable or Undetermined are omitted.
+#' @importFrom dplyr %>% filter
+#' @importFrom plotly plot_ly layout
+#' @importFrom htmlwidgets saveWidget
 #' @param FC_results A matrix containing the counts from RNA and RIBO
 #' samples.
 #' @param path A string, pointing to where to save the html plot.
@@ -12,7 +15,7 @@
 plotDTA <- function(FC_results, path) {
   # Filters out omitted RegModes
   df <- FC_results %>%
-    filter(!("RegMode" %in% c("Undeterminable", "Undetermined")))
+    dplyr::filter(!("RegMode" %in% c("Undeterminable", "Undetermined")))
 
   # Defines custom colour palette for each Regmode
   custom_colors <- c("Buffered" = "#7ACAFF", "Exclusive" = "#FE939F",
@@ -21,7 +24,7 @@ plotDTA <- function(FC_results, path) {
 
   # Create the plot
 
-  plot <- plot_ly(
+  plot <- plotly::plot_ly(
     data = df,
     x = ~RNA_FC,
     y = ~RIBO_FC,
@@ -40,7 +43,7 @@ plotDTA <- function(FC_results, path) {
       paper_bgcolor = "#FFFFFF"
     )
 
-  saveWidget(plot, path)
+  htmlwidgets::saveWidget(plot, path)
   return(plot)
 
 }

@@ -8,7 +8,7 @@
 #' This function reads RNA and RIBO count files, checks input data validity and
 #'  merges them into a single numerical matrix (expression.data.
 #'  It also prepares the metatadata needed by padog (exp_de).
-#'
+#' @importFrom utils read.table
 #' @param path_to_RNA_counts A string representing the file path
 #' to the RNA counts data file (.csv or .tsv).
 #' @param path_to_RIBO_counts A string representing the file path
@@ -26,9 +26,9 @@ prepareTerapadogData <- function (path_to_RNA_counts, path_to_RIBO_counts,
                                   analysis.group.1, analysis.group.2) {
 
   # Read the file using the detected separator
-  RNA_counts <- read.table(path_to_RNA_counts, sep = detect_separator(
+  RNA_counts <- utils::read.table(path_to_RNA_counts, sep = detect_separator(
     path_to_RNA_counts), header = TRUE)
-  RIBO_counts <- read.table(path_to_RIBO_counts, sep = detect_separator(
+  RIBO_counts <- utils::read.table(path_to_RIBO_counts, sep = detect_separator(
     path_to_RIBO_counts), header = TRUE)
 
   # Check colnames are matching
@@ -64,7 +64,7 @@ prepareTerapadogData <- function (path_to_RNA_counts, path_to_RIBO_counts,
   # Create exp_de by putting together SampleID, SampleName, SeqType
   exp_de <- data.frame(SampleID, SampleName, SeqType)
   # Read the metadata, assign Group to exp_de based on value of SampleName
-  metadata <- read.table(path_to_metadata, sep = detect_separator(
+  metadata <- utils::read.table(path_to_metadata, sep = detect_separator(
     path_to_metadata), header = TRUE)
   exp_de$Condition <- metadata$Condition[match(exp_de$SampleName, metadata$SampleName)]
 

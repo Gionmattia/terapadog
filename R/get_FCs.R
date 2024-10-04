@@ -5,6 +5,8 @@
 #' using DeltaTE.
 #' The output is a dataframe with the FC in mRNA counts, RIBO counts or TE
 #' between the conditions in exam.
+#' @importFrom DESeq2 DESeqDataSetFromMatrix DESeq results lfcShrink
+#' @importFrom dplyr %>% filter select left_join
 #' @param expression.data A matrix containing the counts from RNA and RIBO
 #' samples.
 #' @param exp_de A dataframe containing information regarding the samples.
@@ -34,23 +36,23 @@ get_FCs <- function(expression.data, exp_de, paired = FALSE) {
   }
 
   # run DeltaTE to get the TE linear model
-  ddsMat <- DESeqDataSetFromMatrix(
+  ddsMat <- DESeq2::DESeqDataSetFromMatrix(
     countData = expression.data, # Ribo_counts and rna_counts should have been provided as a single dataframe already.
     colData = exp_de, # This is where we give DeltaTe the info
     design = design_TE
   )
 
   # Run DESeq
-  ddsMat <- suppressMessages(DESeq(ddsMat))
+  ddsMat <- suppressMessages(DESeq2::DESeq(ddsMat))
 
   # Extract the fold changes
-  res <- results(ddsMat, name = "Groupd.SeqTypeRIBO")
+  res <- DESeq2::results(ddsMat, name = "Groupd.SeqTypeRIBO")
 
   # FC analysis for RNA counts:
   # Create filter using exp_de to find samples with SeqType "RNA"
   rna_samples <- exp_de %>%
-    filter("SeqType" == "RNA") %>%
-    select("SampleID")
+    dplyr::filter("SeqType" == "RNA") %>%
+    dplyr::select("SampleID")
 
 # Extract Sample IDs as a vector
   rna_sample_ids <- rna_samples$SampleID
@@ -59,20 +61,20 @@ get_FCs <- function(expression.data, exp_de, paired = FALSE) {
   expression.data.rna <- expression.data[, rna_sample_ids]
 
 # Execute the analysis for RNA counts
-  ddsMat_rna <- DESeqDataSetFromMatrix(
+  ddsMat_rna <- DESeq2::DESeqDataSetFromMatrix(
     countData = expression.data.rna,
     colData=exp_de[which(exp_de$SeqType == "RNA"),],
     design = design_R)
 
-  ddsMat_rna <- DESeq(ddsMat_rna)
-  res_rna <- results(ddsMat_rna, name="Group_d_vs_c") # Check name of result! we encode it as "d" and "c"
-  res_rna <- lfcShrink(ddsMat_rna,coef="Group_d_vs_c", res=res_rna)
+  ddsMat_rna <- DESeq2::DESeq(ddsMat_rna)
+  res_rna <- DESeq2::results(ddsMat_rna, name="Group_d_vs_c") # Check name of result! we encode it as "d" and "c"
+  res_rna <- DESeq2::lfcShrink(ddsMat_rna,coef="Group_d_vs_c", res=res_rna)
 
   # FC analsysis for RIBO counts:
   # Create filter using exp_de to find samples with SeqType  "RIBO"
   ribo_data <- exp_de %>%
-    filter("SeqType" == "RIBO") %>%
-    select("SampleID")
+    dplyr::filter("SeqType" == "RIBO") %>%
+    dplyr::select("SampleID")
 
   # Extract Sample IDs as a vector
   ribo_sample_ids <- ribo_data$SampleID
@@ -81,31 +83,31 @@ get_FCs <- function(expression.data, exp_de, paired = FALSE) {
   expression.data.ribo <- expression.data[, ribo_sample_ids]
 
   # Getting FC for Ribo
-  ddsMat_ribo <- DESeqDataSetFromMatrix(
+  ddsMat_ribo <- DESeq2::DESeqDataSetFromMatrix(
     countData = expression.data.ribo,
     colData = exp_de[which(exp_de$SeqType == "RIBO"),],
     design = design_R)
 
-  ddsMat_ribo <- DESeq(ddsMat_ribo)
-  res_ribo <- results(ddsMat_ribo,name="Group_d_vs_c")
-  res_ribo <- lfcShrink(ddsMat_ribo,coef="Group_d_vs_c", res=res_ribo)
+  ddsMat_ribo <- DESeq2::DESeq(ddsMat_ribo)
+  res_ribo <- DESeq2::results(ddsMat_ribo,name="Group_d_vs_c")
+  res_ribo <- DESeq2::lfcShrink(ddsMat_ribo,coef="Group_d_vs_c", res=res_ribo)
 
   # convert results to dataframe
   res$Identifier <- rownames(res)
   res_combined <- as.data.frame(res)
 
   res_rna_slim <- as.data.frame(res_rna) %>%
-    select(RNA_FC = "log2FoldChange", RNA_padj = "padj")
+    dplyr::select(RNA_FC = "log2FoldChange", RNA_padj = "padj")
 
   res_ribo_slim <- as.data.frame(res_ribo) %>%
-    select(RIBO_FC = "log2FoldChange", RIBO_padj = "padj")
+    dplyr::select(RIBO_FC = "log2FoldChange", RIBO_padj = "padj")
 
   res_rna_slim$Identifier <- rownames(res_rna_slim)
   res_ribo_slim$Identifier <- rownames(res_ribo_slim)
 
   res_combined <- res_combined %>%
-    left_join(res_ribo_slim, by = "Identifier") %>%
-    left_join(res_rna_slim, by = "Identifier")
+    dplyr::left_join(res_ribo_slim, by = "Identifier") %>%
+    dplyr::left_join(res_rna_slim, by = "Identifier")
 
   res_combined <- assign_Regmode(res_combined)
 
