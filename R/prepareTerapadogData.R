@@ -6,7 +6,7 @@
 #' Prepare Data by Loading and Validating RNA, RIBO Counts, and Metadata
 #'
 #' This function reads RNA and RIBO count files, checks input data validity and
-#'  merges them into a single numerical matrix (expression.data.
+#'  merges them into a single numerical matrix (expression.data).
 #'  It also prepares the metatadata needed by padog (exp_de).
 #' @importFrom utils read.table
 #' @param path_to_RNA_counts A string representing the file path
@@ -18,7 +18,25 @@
 #' the experiment (e.g., WT, control, etc.).
 #' @param analysis.group.2 A string specifying the target group to compare
 #' against the baseline (e.g., mutant, disease, treatment, etc.).
-#' @return A list containing two data frames: `RNA_counts` and `RIBO_counts`.
+#' @return A list containing two data frames: expression.data and exp_de.
+#' @examples
+#' # Data is also available in the "extdata" folder of this package.
+#' # The path will be automatically generated for the purpose of this example
+#' rna_file <- system.file("extdata", "rna_counts.tsv",
+#' package = "terapadog")
+#' ribo_file <- system.file("extdata", "ribo_counts.tsv",
+#' package = "terapadog")
+#' sample_file <- system.file("extdata", "sample_info.tsv",
+#'  package = "terapadog")
+#'  # Use the paths to load the files.
+#' prepared_data <- prepareTerapadogData(rna_file, ribo_file,
+#' sample_file, "1", "2")
+#' # Unpacks the expression.data and exp_de from the output
+#' expression.data <- prepared_data$expression.data
+#' exp_de <- prepared_data$exp_de
+#' # For sake of brevity, only the data frame's head will be printed out
+#' print(head(expression.data))
+#' print(head(exp_de))
 #' @export
 #'
 prepareTerapadogData <- function (path_to_RNA_counts, path_to_RIBO_counts,

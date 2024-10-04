@@ -4,7 +4,8 @@
 \alias{assign_Regmode}
 \title{This function reads the results of the function getFCs and assigns a
 regulatory mode to each gene based on the Fold Change (FC) for RNA-Seq Counts,
-Ribo-Seq Counts, or TE.}
+Ribo-Seq Counts, or TE. It is intended for internal use and its output is
+the output of get_FCs.R}
 \usage{
 assign_Regmode(res_df)
 }
@@ -17,6 +18,16 @@ A dataframe, with two extra columns with info on the Regulatory Mode
 \description{
 This function reads the results of the function getFCs and assigns a
 regulatory mode to each gene based on the Fold Change (FC) for RNA-Seq Counts,
-Ribo-Seq Counts, or TE.
+Ribo-Seq Counts, or TE. It is intended for internal use and its output is
+the output of get_FCs.R
+}
+\examples{
+# For testing purposes of this internal function a mock-file is provided
+# within the extdata folder.
+mockdata <- system.file("extdata", "mock_get_FCs_result.tsv",
+package = "terapadog")
+result <- assign_Regmode(mockdata)
+# Only the head of the result file will be returned
+print(head(result))
 }
 \keyword{internal}

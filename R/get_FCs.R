@@ -36,7 +36,7 @@ get_FCs <- function(expression.data, exp_de, paired = FALSE) {
   }
 
   # run DeltaTE to get the TE linear model
-  ddsMat <- DESeq2::DESeqDataSetFromMatrix(
+  ddsMat <- DESeqDataSetFromMatrix(
     countData = expression.data, # Ribo_counts and rna_counts should have been provided as a single dataframe already.
     colData = exp_de, # This is where we give DeltaTe the info
     design = design_TE
@@ -51,8 +51,8 @@ get_FCs <- function(expression.data, exp_de, paired = FALSE) {
   # FC analysis for RNA counts:
   # Create filter using exp_de to find samples with SeqType "RNA"
   rna_samples <- exp_de %>%
-    dplyr::filter("SeqType" == "RNA") %>%
-    dplyr::select("SampleID")
+    dplyr::filter(SeqType == "RNA") %>%
+    dplyr::select(SampleID)
 
 # Extract Sample IDs as a vector
   rna_sample_ids <- rna_samples$SampleID
@@ -68,13 +68,13 @@ get_FCs <- function(expression.data, exp_de, paired = FALSE) {
 
   ddsMat_rna <- DESeq2::DESeq(ddsMat_rna)
   res_rna <- DESeq2::results(ddsMat_rna, name="Group_d_vs_c") # Check name of result! we encode it as "d" and "c"
-  res_rna <- DESeq2::lfcShrink(ddsMat_rna,coef="Group_d_vs_c", res=res_rna)
+  res_rna <- lfcShrink(ddsMat_rna,coef="Group_d_vs_c", res=res_rna)
 
   # FC analsysis for RIBO counts:
   # Create filter using exp_de to find samples with SeqType  "RIBO"
   ribo_data <- exp_de %>%
-    dplyr::filter("SeqType" == "RIBO") %>%
-    dplyr::select("SampleID")
+    dplyr::filter(SeqType == "RIBO") %>%
+    dplyr::select(SampleID)
 
   # Extract Sample IDs as a vector
   ribo_sample_ids <- ribo_data$SampleID
@@ -90,7 +90,7 @@ get_FCs <- function(expression.data, exp_de, paired = FALSE) {
 
   ddsMat_ribo <- DESeq2::DESeq(ddsMat_ribo)
   res_ribo <- DESeq2::results(ddsMat_ribo,name="Group_d_vs_c")
-  res_ribo <- DESeq2::lfcShrink(ddsMat_ribo,coef="Group_d_vs_c", res=res_ribo)
+  res_ribo <- lfcShrink(ddsMat_ribo,coef="Group_d_vs_c", res=res_ribo)
 
   # convert results to dataframe
   res$Identifier <- rownames(res)

@@ -21,7 +21,7 @@ LazyData: TRUE
 Imports: DESeq2, KEGGREST, doParallel, stats, utils, foreach, doRNG, dplyr, plotly, htmlwidgets, biomaRt
 Suggests: BiocStyle, knitr
 Collate: preprocessing_helpers.R id_converter.R prepareTerapadogData.R terapadog.R get_FCs.R assign_Regmode.R PlotDTA.R 
-BiocViews: RiboSeq, Transcriptomics, GeneSetEnrichment, GeneRegulation, 
+biocViews: RiboSeq, Transcriptomics, GeneSetEnrichment, GeneRegulation, 
     Reactome, Software
 RoxygenNote: 7.3.2
 VignetteBuilder: knitr

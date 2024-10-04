@@ -49,3 +49,20 @@ gslist <- tapply(a$gns, a$path, function(x) {
 gs.names <- keggList("pathway", organism)[paste0("path:",
                                                  organism, names(gslist))]
 names(gs.names) <- names(gslist)
+
+
+
+#' # Data is available in the "inst/extdata" folder of this package
+prepared_data <- prepareTerapadogData("./inst/extdata/rna_counts.tsv", "./inst/extdata/ribo_counts.tsv", "./inst/extdata/sample_info.tsv", "1", "2")
+#' # Unpacks the expression.data and exp_de from the output
+expression.data <- prepared_data$expression.data
+exp_de <- prepared_data$exp_de
+#' # For sake of brevity, only the data frame's head will be printed out
+print(head(expression.data))
+print(head(exp_de))
+
+
+
+# Trying get_FCs.R
+
+results <- get_FCs(expression.data, exp_de)
