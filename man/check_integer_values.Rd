@@ -17,4 +17,13 @@ This function checks whether each numeric column in the provided dataframe
 contains only integer values. If a column contains floating-point numbers,
 it rounds the values and converts them to integers.
 }
+\examples{
+# Internal function, code cannot be run from here.
+\dontrun{
+rna_file <- system.file("extdata", "rna_counts.tsv",
+package = "terapadog")
+rna_df <- read.table(rna_file, header = TRUE, sep = "\t")
+check_integer_values(rna_df)
+}
+}
 \keyword{internal}

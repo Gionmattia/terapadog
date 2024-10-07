@@ -20,4 +20,16 @@ the same set of column names, regardless of their order.
 This is important for how terapadog handles these matching samples during
 shuffles.
 }
+\examples{
+#' # Internal function, code cannot be run from here.
+\dontrun{
+rna_file <- system.file("extdata", "rna_counts.tsv",
+package = "terapadog")
+ribo_file <- system.file("extdata", "ribo_counts.tsv",
+package = "terapadog")
+rna_df <- read.table(rna_file, header = TRUE, sep = "\t")
+ribo_df <- read.table(ribo_file, header = TRUE, sep = "\t")
+check_matching_colnames(rna_df, ribo_df)
+}
+}
 \keyword{internal}

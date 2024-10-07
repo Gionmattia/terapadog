@@ -22,12 +22,20 @@ Ribo-Seq Counts, or TE. It is intended for internal use and its output is
 the output of get_FCs.R
 }
 \examples{
-# For testing purposes of this internal function a mock-file is provided
-# within the extdata folder.
-mockdata <- system.file("extdata", "mock_get_FCs_result.tsv",
-package = "terapadog")
+# Internal function, code cannot be run from here.
+\dontrun{
+mockdata <- data.frame(
+  Identifier = c("ENSG00000248713", "ENSG00000125780"),
+  log2FoldChange = c(-0.69, 2),
+  padj = c(0.16, 0.001),
+  RIBO_FC = c(0.27, 3),
+  RIBO_padj = c(0.45, 0.002),
+  RNA_FC = c(1, 0.56),
+  RNA_padj = c(0.001, 0.65)
+)
 result <- assign_Regmode(mockdata)
 # Only the head of the result file will be returned
 print(head(result))
+}
 }
 \keyword{internal}

@@ -7,6 +7,12 @@
 #'
 #' @param path A string representing the file path.
 #' @return A string representing the separator (comma or tab).
+#' @examples
+#' # Internal function, code cannot be run from here.
+#' \dontrun{
+#' result <- detect_separator("this/function/is/quite/easy.csv")
+#' print(result)
+#' }
 #' @keywords internal
 #'
 detect_separator <- function (path) {
@@ -32,6 +38,17 @@ detect_separator <- function (path) {
 #' @param df1 A dataframe.
 #' @param df2 A dataframe.
 #' @return NULL. Throws an error if column names do not match.
+#' @examples
+#' #' # Internal function, code cannot be run from here.
+#' \dontrun{
+#' rna_file <- system.file("extdata", "rna_counts.tsv",
+#' package = "terapadog")
+#' ribo_file <- system.file("extdata", "ribo_counts.tsv",
+#' package = "terapadog")
+#' rna_df <- read.table(rna_file, header = TRUE, sep = "\t")
+#' ribo_df <- read.table(ribo_file, header = TRUE, sep = "\t")
+#' check_matching_colnames(rna_df, ribo_df)
+#' }
 #' @keywords internal
 check_matching_colnames <- function(df1, df2) {
   if (!(all(colnames(df1) %in% colnames(df2))
@@ -50,6 +67,14 @@ check_matching_colnames <- function(df1, df2) {
 #'
 #' @param df A dataframe containing numeric values.
 #' @return NULL. Throws an error if the range does not exceed the threshold.
+#' @examples
+#' #' # Internal function, code cannot be run from here.
+#' \dontrun{
+#' rna_file <- system.file("extdata", "rna_counts.tsv",
+#' package = "terapadog")
+#' rna_df <- read.table(rna_file, header = TRUE, sep = "\t")
+#' check_value_range(rna_df)
+#' }
 #' @keywords internal
 check_value_range <- function(df) {
 
@@ -71,6 +96,14 @@ check_value_range <- function(df) {
 #'
 #' @param df A dataframe to be checked and potentially modified.
 #' @return A dataframe with numeric columns as integers.
+#' @examples
+#' # Internal function, code cannot be run from here.
+#' \dontrun{
+#' rna_file <- system.file("extdata", "rna_counts.tsv",
+#' package = "terapadog")
+#' rna_df <- read.table(rna_file, header = TRUE, sep = "\t")
+#' check_integer_values(rna_df)
+#' }
 #' @keywords internal
 check_integer_values <- function(df) {
   are_columns_integer <- sapply(df, function(x)

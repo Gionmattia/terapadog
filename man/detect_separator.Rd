@@ -16,4 +16,11 @@ A string representing the separator (comma or tab).
 This function determines whether the file uses a comma or tab as a separator
 based on the file extension (.csv or .tsv).
 }
+\examples{
+# Internal function, code cannot be run from here.
+\dontrun{
+result <- detect_separator("this/function/is/quite/easy.csv")
+print(result)
+}
+}
 \keyword{internal}

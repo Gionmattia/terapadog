@@ -2,8 +2,8 @@
 % Please edit documentation in R/id_converter.R
 \name{id_converter}
 \alias{id_converter}
-\title{Convert the gene identifier to entrezgene_id format for the analysis.
-Works on human only!}
+\title{Convert the human gene identifier (hgnc_symbol or ensembl_gene_id) to
+entrezgene_id format for the analysis.}
 \usage{
 id_converter(esetm, id_type)
 }
@@ -17,7 +17,18 @@ either hgnc_symbol or ensembl_gene_id.}
 A dataframe with gene IDs in the entrezgene_id format.
 }
 \description{
-Convert the gene identifier to entrezgene_id format for the analysis.
-Works on human only!
+Convert the human gene identifier (hgnc_symbol or ensembl_gene_id) to
+entrezgene_id format for the analysis.
+}
+\examples{
+# Internal function, the following code cannot be run from here.
+\dontrun{
+# To showcase this internal function, only one file (rna_counts) is used.
+path <- system.file("extdata", "rna_counts.tsv", package = "terapadog")
+esetm <- read.table(path, header = TRUE, sep = "\t")
+# Call the function
+converted_esetm <- id_converter(esetm, "ensembl_gene_id")
+print(head(esetm))
+}
 }
 \keyword{internal}

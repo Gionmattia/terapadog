@@ -4,14 +4,24 @@
 
 # R/id_converter.R
 
-#' Convert the gene identifier to entrezgene_id format for the analysis.
-#' Works on human only!
+#' Convert the human gene identifier (hgnc_symbol or ensembl_gene_id) to
+#' entrezgene_id format for the analysis.
 #' @importFrom biomaRt useMart getBM
 #' @importFrom stats setNames
 #' @param esetm A dataframe with the gene count values.
 #' @param id_type A string representing the type of ID given as input. Must be
 #' either hgnc_symbol or ensembl_gene_id.
 #' @return A dataframe with gene IDs in the entrezgene_id format.
+#' @examples
+#' # Internal function, the following code cannot be run from here.
+#' \dontrun{
+#' # To showcase this internal function, only one file (rna_counts) is used.
+#' path <- system.file("extdata", "rna_counts.tsv", package = "terapadog")
+#' esetm <- read.table(path, header = TRUE, sep = "\t")
+#' # Call the function
+#' converted_esetm <- id_converter(esetm, "ensembl_gene_id")
+#' print(head(esetm))
+#' }
 #' @keywords internal
 #'
 

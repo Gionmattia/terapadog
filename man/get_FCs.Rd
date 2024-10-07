@@ -19,9 +19,34 @@ It has number of rows equal to the columns of esetm.}
 \item{paired}{Logical. Default is false. Set to TRUE if the experiment
 has paired samples in its design.}
 }
+\value{
+A dataframe with the results of a Differential Translation Analysis.
+Each gene's change in RNA counts, RFP(/RIBO) counts and TE are reported,
+along with the relative adjusted p-values. The RegModes are also reported.
+}
 \description{
 This function execute the Differential Translation Analysis on its own
 using DeltaTE.
 The output is a dataframe with the FC in mRNA counts, RIBO counts or TE
 between the conditions in exam.
+}
+\examples{
+# The execution of a DTA can take some time and computational resources.
+# If you run this, wait patiently.
+# Load the data
+rna_file <- system.file("extdata", "rna_counts.tsv",
+package = "terapadog")
+ribo_file <- system.file("extdata", "ribo_counts.tsv",
+package = "terapadog")
+sample_file <- system.file("extdata", "sample_info.tsv",
+package = "terapadog")
+ # Use the paths to load the files.
+prepared_data <- prepareTerapadogData(rna_file, ribo_file,
+sample_file, "1", "2")
+# Unpacks the expression.data and exp_de from the output
+expression.data <- prepared_data$expression.data
+exp_de <- prepared_data$exp_de
+result <- get_FCs(expression.data, exp_de)
+# Only the head of the result file will be returned
+print(head(result))
 }

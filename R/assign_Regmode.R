@@ -9,13 +9,21 @@
 #' @param res_df A dataframe, output of the function getFCs
 #' @return A dataframe, with two extra columns with info on the Regulatory Mode
 #' @examples
-#' # For testing purposes of this internal function a mock-file is provided
-#' # within the extdata folder.
-#' mockdata <- system.file("extdata", "mockfile_assignRegmode.tsv",
-#' package = "terapadog")
+#' # Internal function, code cannot be run from here.
+#' \dontrun{
+#' mockdata <- data.frame(
+#'   Identifier = c("ENSG00000248713", "ENSG00000125780"),
+#'   log2FoldChange = c(-0.69, 2),
+#'   padj = c(0.16, 0.001),
+#'   RIBO_FC = c(0.27, 3),
+#'   RIBO_padj = c(0.45, 0.002),
+#'   RNA_FC = c(1, 0.56),
+#'   RNA_padj = c(0.001, 0.65)
+#' )
 #' result <- assign_Regmode(mockdata)
 #' # Only the head of the result file will be returned
 #' print(head(result))
+#' }
 #' @keywords internal
 
 assign_Regmode <- function(res_df) {

@@ -66,3 +66,16 @@ print(head(exp_de))
 # Trying get_FCs.R
 
 results <- get_FCs(expression.data, exp_de)
+
+
+# creating mockDTA results
+
+mockDTA <- read.table("~/Desktop/terapadog/inst/extdata/mockfile_assignRegmode.tsv", header = TRUE)
+mockDTA2 <- assign_Regmode(mockDTA)
+write.csv(mockDTA2, "~/Desktop/terapadog/inst/extdata/mock_DTA_results.tsv")
+
+plotDTA(mockDTA2, "~/Desktop/plot_test.html")
+
+count <- sum(mockDTA2$RegMode %in% c("Undeterminable", "Undetermined"))
+
+count

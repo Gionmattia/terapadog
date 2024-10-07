@@ -36,10 +36,31 @@
 #' @param ncr The number of CPU cores used when parallel set to TRUE.
 #' Default is to use all CPU cores detected
 #' @return A dataframe with the PADOG score for each pathway in exam.
+#' @examples
+#' # Since this functional can be computationally-intensive, the example will
+#' # not be run automatically.
+#' \dontrun{
+#' rna_file <- system.file("extdata", "rna_counts.tsv",
+#' package = "terapadog")
+#' ribo_file <- system.file("extdata", "ribo_counts.tsv",
+#' package = "terapadog")
+#' sample_file <- system.file("extdata", "sample_info.tsv",
+#'  package = "terapadog")
+#'  # Use the paths to load the files.
+#' prepared_data <- prepareTerapadogData(rna_file, ribo_file,
+#' sample_file, "1", "2")
+#' # Unpacks the expression.data and exp_de from the output
+#' expression.data <- prepared_data$expression.data
+#' exp_de <- prepared_data$exp_de
+#' result <- terapadog(expression.data, exp_de)
+#' print(head(result))
+#' }
+#'
+#'
 #' @export
 #'
 #'
-terapadog2 <- function (esetm = NULL, exp_de = NULL, paired = FALSE,
+terapadog <- function (esetm = NULL, exp_de = NULL, paired = FALSE,
                        gslist = "KEGGRESTpathway", organism = "hsa" ,
                        gs.names = NULL, NI = 1000, Nmin = 3, verbose = TRUE,
                        parallel = FALSE, dseed = NULL, ncr = NULL) {

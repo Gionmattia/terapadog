@@ -18,4 +18,13 @@ dataframe is below 1. If so, this is an indication the data was scaled
 or anyway processed in a way that makes it not suitable for DeltaTE's
 analysis within terapadog. The input counts must be raw counts.
 }
+\examples{
+#' # Internal function, code cannot be run from here.
+\dontrun{
+rna_file <- system.file("extdata", "rna_counts.tsv",
+package = "terapadog")
+rna_df <- read.table(rna_file, header = TRUE, sep = "\t")
+check_value_range(rna_df)
+}
+}
 \keyword{internal}
