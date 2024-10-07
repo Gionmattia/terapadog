@@ -6,7 +6,7 @@
 #' The output is a dataframe with the FC in mRNA counts, RIBO counts or TE
 #' between the conditions in exam.
 #' @importFrom DESeq2 DESeqDataSetFromMatrix DESeq results lfcShrink
-#' @importFrom dplyr %>% filter select left_join
+#' @importFrom dplyr %>% filter select left_join sym
 #' @param expression.data A matrix containing the counts from RNA and RIBO
 #' samples.
 #' @param exp_de A dataframe containing information regarding the samples.
@@ -18,7 +18,7 @@
 #' along with the relative adjusted p-values. The RegModes are also reported.
 #' @examples
 #' # The execution of a DTA can take some time and computational resources.
-#' # If you run this, wait patiently.
+#' # Henceforth, the following code is not supposed to be run from the man page.
 #' # Load the data
 #' rna_file <- system.file("extdata", "rna_counts.tsv",
 #' package = "terapadog")
@@ -33,8 +33,6 @@
 #' expression.data <- prepared_data$expression.data
 #' exp_de <- prepared_data$exp_de
 #' result <- get_FCs(expression.data, exp_de)
-#' # Only the head of the result file will be returned
-#' print(head(result))
 #' @export
 #'
 #'
@@ -73,8 +71,8 @@ get_FCs <- function(expression.data, exp_de, paired = FALSE) {
   # FC analysis for RNA counts:
   # Create filter using exp_de to find samples with SeqType "RNA"
   rna_samples <- exp_de %>%
-    dplyr::filter(SeqType == "RNA") %>%
-    dplyr::select(SampleID)
+    dplyr::filter(!!dplyr::sym("SeqType") == "RNA") %>%
+    dplyr::select(!!dplyr::sym("SampleID"))
 
 # Extract Sample IDs as a vector
   rna_sample_ids <- rna_samples$SampleID
@@ -95,8 +93,8 @@ get_FCs <- function(expression.data, exp_de, paired = FALSE) {
   # FC analsysis for RIBO counts:
   # Create filter using exp_de to find samples with SeqType  "RIBO"
   ribo_data <- exp_de %>%
-    dplyr::filter(SeqType == "RIBO") %>%
-    dplyr::select(SampleID)
+    dplyr::filter(!!dplyr::sym("SeqType") == "RIBO") %>%
+    dplyr::select(!!dplyr::sym("SampleID"))
 
   # Extract Sample IDs as a vector
   ribo_sample_ids <- ribo_data$SampleID

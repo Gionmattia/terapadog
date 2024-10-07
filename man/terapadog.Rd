@@ -54,7 +54,10 @@ significance p-values.}
 
 \item{parallel}{Logical. Allows for parallel execution to speed up.}
 
-\item{dseed}{Optional initial seed for random number generator (integer).}
+\item{dseed}{Integer. For serial execution, users can forgo this or just use
+`set.seed()` before calling the function, if they desire reproducibility.
+For parrallel execution (`parallel = TRUE`) setting `dseed` is mandatory.
+The function will raise an error if no seed is given.}
 
 \item{ncr}{The number of CPU cores used when parallel set to TRUE.
 Default is to use all CPU cores detected}
@@ -69,8 +72,8 @@ This function reads RNA and RIBO count files, checks input data validity and
 }
 \examples{
 # Since this functional can be computationally-intensive, the example will
-# not be run automatically.
-\dontrun{
+# not be tested automatically. Please beware if running from man page.
+\donttest{
 rna_file <- system.file("extdata", "rna_counts.tsv",
 package = "terapadog")
 ribo_file <- system.file("extdata", "ribo_counts.tsv",
@@ -83,6 +86,8 @@ sample_file, "1", "2")
 # Unpacks the expression.data and exp_de from the output
 expression.data <- prepared_data$expression.data
 exp_de <- prepared_data$exp_de
+# Converts the IDs from ensembl to entrez
+expression.data <- id_converter(expression.data, "ensembl_gene_id")
 result <- terapadog(expression.data, exp_de)
 print(head(result))
 }

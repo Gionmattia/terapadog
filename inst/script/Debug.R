@@ -16,11 +16,13 @@ exp_de <- dats$exp_de
 # Debug: testing terapadog itself
 
 #load gene.indices
-#load("~/Desktop/terapadog/data/gene_identifier_set.Rdata")
+#load("~/Desktop/terapadog/data/gene_identifier_set.Rdata"
 
+# Important!! Need to convert the ID if it's not done before!!
 expression.data <- id_converter(expression.data, "ensembl_gene_id")
+res <- terapadog(esetm = expression.data, exp_de = exp_de)
 
-is_paired <- FALSE
+
 
 res <- terapadog2(esetm = expression.data, exp_de = exp_de, paired = is_paired,NI = 1000, Nmin = 0)
 
@@ -79,3 +81,31 @@ plotDTA(mockDTA2, "~/Desktop/plot_test.html")
 count <- sum(mockDTA2$RegMode %in% c("Undeterminable", "Undetermined"))
 
 count
+
+# Downsizing the testing files to reduce the running time of tutorials.
+
+path_to_RNA_counts <- "~/Desktop/terapadog/inst/extdata/rna_counts.tsv"
+path_to_RIBO_counts <- "~/Desktop/terapadog/inst/extdata/ribo_counts.tsv"
+
+rna <- read.table(path_to_RNA_counts, sep = "\t")
+ribo <- read.table(path_to_RIBO_counts, sep = "\t")
+
+rows_to_remove <- rownames(rna)[1:10000]
+
+# 2. Remove these rows from both df1 and df2
+rna <- rna[!rownames(rna) %in% rows_to_remove, ]
+ribo <- ribo[!rownames(ribo) %in% rows_to_remove, ]
+
+write.table(rna, "~/Desktop/reduced_rna.tsv", sep = "\t")
+write.table(ribo, "~/Desktop/reduced_ribo.tsv", sep = "\t")
+
+
+# Testing the shortned files
+
+path_to_RNA_counts <- "~/Desktop/reduced_rna.tsv"
+path_to_RIBO_counts <- "~/Desktop/reduced_ribo.tsv"
+
+write.table(results, "~/Desktop/reduced_results.tsv", sep = "\t")
+plotDTA(results, "~/Desktop/Delete.html")
+
+terapadog(esetm = expression.data, exp_de = exp_de)

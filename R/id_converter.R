@@ -13,16 +13,17 @@
 #' either hgnc_symbol or ensembl_gene_id.
 #' @return A dataframe with gene IDs in the entrezgene_id format.
 #' @examples
-#' # Internal function, the following code cannot be run from here.
-#' \dontrun{
-#' # To showcase this internal function, only one file (rna_counts) is used.
-#' path <- system.file("extdata", "rna_counts.tsv", package = "terapadog")
-#' esetm <- read.table(path, header = TRUE, sep = "\t")
+#' # To showcase this internal function, a small example is made.
+#' gene_ids <- c('ENSG00000103197', 'ENSG00000008710', 'ENSG00000167964')
+#' esetm <- data.frame(
+#' Sample1 = c(2.5, 3.1, 5.2),
+#' Sample2 = c(4.1, 2.9, 6.3),
+#' Sample3 = c(1.5, 3.7, 4.8),
+#' row.names = gene_ids)
 #' # Call the function
-#' converted_esetm <- id_converter(esetm, "ensembl_gene_id")
+#' esetm <- id_converter(esetm, "ensembl_gene_id")
 #' print(head(esetm))
-#' }
-#' @keywords internal
+#' @export
 #'
 
 id_converter <- function(esetm, id_type) {

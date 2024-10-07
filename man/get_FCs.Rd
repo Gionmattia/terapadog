@@ -32,7 +32,7 @@ between the conditions in exam.
 }
 \examples{
 # The execution of a DTA can take some time and computational resources.
-# If you run this, wait patiently.
+# Henceforth, the following code is not supposed to be run from the man page.
 # Load the data
 rna_file <- system.file("extdata", "rna_counts.tsv",
 package = "terapadog")
@@ -47,6 +47,4 @@ sample_file, "1", "2")
 expression.data <- prepared_data$expression.data
 exp_de <- prepared_data$exp_de
 result <- get_FCs(expression.data, exp_de)
-# Only the head of the result file will be returned
-print(head(result))
 }

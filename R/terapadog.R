@@ -9,6 +9,7 @@
 #' @importFrom foreach foreach
 #' @importFrom doRNG %dorng%
 #' @importFrom utils combn
+#' @importFrom methods is
 #' @importFrom stats var quantile sd na.omit
 #' @param esetm A matrix containing the counts from RNA and RIBO samples.
 #' Rownames must be ensembl GENEIDs, while column names must be sample names.
@@ -32,14 +33,17 @@
 #' @param Nmin The minimum size of gene sets to be included in the analysis.
 #' @param verbose Logical. If true, shows number of iterations done.
 #' @param parallel Logical. Allows for parallel execution to speed up.
-#' @param dseed Optional initial seed for random number generator (integer).
+#' @param dseed Integer. For serial execution, users can forgo this or just use
+#' `set.seed()` before calling the function, if they desire reproducibility.
+#' For parrallel execution (`parallel = TRUE`) setting `dseed` is mandatory.
+#' The function will raise an error if no seed is given.
 #' @param ncr The number of CPU cores used when parallel set to TRUE.
 #' Default is to use all CPU cores detected
 #' @return A dataframe with the PADOG score for each pathway in exam.
 #' @examples
 #' # Since this functional can be computationally-intensive, the example will
-#' # not be run automatically.
-#' \dontrun{
+#' # not be tested automatically. Please beware if running from man page.
+#' \donttest{
 #' rna_file <- system.file("extdata", "rna_counts.tsv",
 #' package = "terapadog")
 #' ribo_file <- system.file("extdata", "ribo_counts.tsv",
@@ -52,6 +56,8 @@
 #' # Unpacks the expression.data and exp_de from the output
 #' expression.data <- prepared_data$expression.data
 #' exp_de <- prepared_data$exp_de
+#' # Converts the IDs from ensembl to entrez
+#' expression.data <- id_converter(expression.data, "ensembl_gene_id")
 #' result <- terapadog(expression.data, exp_de)
 #' print(head(result))
 #' }
@@ -66,6 +72,10 @@ terapadog <- function (esetm = NULL, exp_de = NULL, paired = FALSE,
                        parallel = FALSE, dseed = NULL, ncr = NULL) {
 
   # validity checks of the data
+  if (parallel && is.null(dseed)) {
+    stop("Please provide 'dseed' for reproducible parallel execution.")
+  }
+
   # Initial checks on the data (as PADOG would do). Some have been modified/removed to fit new kind of data.
   if (length(gslist) == 1 && gslist == "KEGGRESTpathway") {
     stopifnot(nchar(organism) == 3)
@@ -88,7 +98,7 @@ terapadog <- function (esetm = NULL, exp_de = NULL, paired = FALSE,
   if (!is.null(gs.names)) {
     stopifnot(length(gslist) == length(gs.names))
   }
-  stopifnot(class(NI) == "numeric")
+  stopifnot(is(NI, "numeric"))
   stopifnot(NI > 5)
   stopifnot(sum(rownames(esetm) %in% as.character(unlist(gslist))) >
                 10 & !any(duplicated(rownames(esetm))))
@@ -130,9 +140,6 @@ terapadog <- function (esetm = NULL, exp_de = NULL, paired = FALSE,
     cat(paste0("Analyzing ", length(gslist), " gene sets with ", Nmin, " or more genes!"))
     cat("\n")
   }
-
-  if (!is.null(dseed))
-    set.seed(dseed)
 
   # Here starts what was modified more heavily.
 
@@ -317,7 +324,8 @@ terapadog <- function (esetm = NULL, exp_de = NULL, paired = FALSE,
     doParallel::registerDoParallel(clust)
     tryCatch({
       parRes <- foreach::foreach(ite = 1:(NI + 1), .combine = "c",
-                        .packages = "DESeq2") %dorng% { # original: .packages = "limma"
+                        .packages = "DESeq2",
+                        .options.RNG = dseed) %dorng% { # original: .packages = "limma"
                           Sres <- gsScoreFun(G, block)
                           tmp <- list(t(Sres))
                           names(tmp) <- ite
