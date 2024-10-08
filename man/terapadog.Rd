@@ -70,27 +70,3 @@ This function reads RNA and RIBO count files, checks input data validity and
  merges them into a single numerical matrix (expression.data.
  It also prepares the metatadata needed by padog (exp_de).
 }
-\examples{
-# Since this functional can be computationally-intensive, the example will
-# not be tested automatically. Please beware if running from man page.
-\donttest{
-rna_file <- system.file("extdata", "rna_counts.tsv",
-package = "terapadog")
-ribo_file <- system.file("extdata", "ribo_counts.tsv",
-package = "terapadog")
-sample_file <- system.file("extdata", "sample_info.tsv",
- package = "terapadog")
- # Use the paths to load the files.
-prepared_data <- prepareTerapadogData(rna_file, ribo_file,
-sample_file, "1", "2")
-# Unpacks the expression.data and exp_de from the output
-expression.data <- prepared_data$expression.data
-exp_de <- prepared_data$exp_de
-# Converts the IDs from ensembl to entrez
-expression.data <- id_converter(expression.data, "ensembl_gene_id")
-result <- terapadog(expression.data, exp_de)
-print(head(result))
-}
-
-
-}
