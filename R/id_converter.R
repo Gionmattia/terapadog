@@ -8,7 +8,8 @@
 #' entrezgene_id format for the analysis.
 #' @importFrom biomaRt useMart getBM
 #' @importFrom stats setNames
-#' @param esetm A dataframe with the gene count values.
+#' @param esetm A matrix with the gene count values and whose rawnames are the
+#' gene Ids (gene symbol or ensembl gene ID).
 #' @param id_type A string representing the type of ID given as input. Must be
 #' either hgnc_symbol or ensembl_gene_id.
 #' @return A dataframe with gene IDs in the entrezgene_id format.
@@ -59,7 +60,7 @@ id_converter <- function(esetm, id_type) {
   # Remove rows with NA Entrez IDs
   esetm <- esetm[!is.na(rownames(esetm)), ]
 
-  # Remove duplicates (if any)
+  # Remove duplicates (if any) maybe not necessary
   esetm <- esetm[!duplicated(rownames(esetm)), ]
 
   return(esetm)
