@@ -8,19 +8,23 @@
 #' entrezgene_id format for the analysis.
 #' @importFrom biomaRt useMart getBM
 #' @importFrom stats setNames
+#' @importFrom utils write.table
 #' @param esetm A matrix with the gene count values and whose rawnames are the
 #' gene Ids (gene symbol or ensembl gene ID).
 #' @param id_type A string representing the type of ID given as input. Must be
 #' either hgnc_symbol or ensembl_gene_id.
-#' @return A dataframe with gene IDs in the entrezgene_id format.
+#' @return A matrix with gene IDs in the entrezgene_id format. Also provides a
+#' report on the duplicated mappings (conversion_report.txt) in the working dir.
 #' @examples
 #' # To showcase this internal function, a small example is made.
-#' gene_ids <- c('ENSG00000103197', 'ENSG00000008710', 'ENSG00000167964')
-#' esetm <- data.frame(
-#' Sample1 = c(2.5, 3.1, 5.2),
-#' Sample2 = c(4.1, 2.9, 6.3),
-#' Sample3 = c(1.5, 3.7, 4.8),
-#' row.names = gene_ids)
+#' gene_ids <- c('ENSG00000103197', 'ENSG00000008710', 'ENSG00000167964'
+#' , 'ENSG00000167964')
+#' esetm <- matrix(c(
+#' 2.5, 3.1, 5.2, 0.1,
+#' 4.1, 2.9, 6.3, 0.5,
+#' 1.5, 3.7, 4.8, 0.1), nrow = 4, byrow = FALSE)
+#' rownames(esetm) <- gene_ids
+#' colnames(esetm) <- c("Sample 1", "Sample 2", "Sample 3")
 #' # Call the function
 #' esetm <- id_converter(esetm, "ensembl_gene_id")
 #' print(head(esetm))
@@ -48,6 +52,25 @@ id_converter <- function(esetm, id_type) {
     mart = mart
   )
 
+  # Extract the duplicated mappings (one entrezgene_id could map to more ids)
+  duplicates_mask <- duplicated(gene_mapping$entrezgene_id) | duplicated(gene_mapping$entrezgene_id, fromLast = TRUE)
+  duplicated_rows <- gene_mapping[duplicates_mask, ]
+  duplicated_rows <- duplicated_rows[!is.na(duplicated_rows$entrezgene_id), ]
+  # Write them to a report for transparency
+  report_message <- paste0(
+    "These are the input Ids mapping to the same entrezgene_id. ",
+    "NA values (no mapping) have been removed. Be aware that the counts from ",
+    "multiple mappings have been aggregated (summed) together under the same ",
+    "entrezgene_id for the purpose of the 'terapadog' analysis. ",
+    nrow(duplicated_rows), " duplicates found:"
+  )
+
+  # Write the explanation to a file
+  writeLines(report_message, "conversion_report.txt")
+  # Append the table to the file
+  write.table(duplicated_rows, "conversion_report.txt", append = TRUE,
+              sep = ",", row.names = FALSE, col.names = TRUE)
+
   # Create a named vector for mapping
   id_to_entrez <- stats::setNames(gene_mapping$entrezgene_id, gene_mapping[[id_type]])
 
@@ -60,8 +83,11 @@ id_converter <- function(esetm, id_type) {
   # Remove rows with NA Entrez IDs
   esetm <- esetm[!is.na(rownames(esetm)), ]
 
+  # Aggregate the multiple mappings (duplicates) under the same entrezgene_id
+  esetm <- rowsum(esetm, group = rownames(esetm))
+
   # Remove duplicates (if any) maybe not necessary
-  esetm <- esetm[!duplicated(rownames(esetm)), ]
+  # esetm <- esetm[!duplicated(rownames(esetm)), ]
 
   return(esetm)
 }

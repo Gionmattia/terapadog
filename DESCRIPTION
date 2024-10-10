@@ -16,7 +16,7 @@ Description: This package performs a Gene Set Analysis with the approach adopted
 License: GPL-2
 Encoding: UTF-8
 LazyData: TRUE
-Imports: DESeq2, KEGGREST, doParallel, stats, utils, foreach, doRNG, dplyr, plotly, htmlwidgets, biomaRt, methods
+Imports: DESeq2, KEGGREST, stats, utils, dplyr, plotly, htmlwidgets, biomaRt, methods
 Suggests: BiocStyle, knitr, apeglm
 Collate: preprocessing_helpers.R id_converter.R prepareTerapadogData.R terapadog.R get_FCs.R assign_Regmode.R plotDTA.R 
 biocViews: RiboSeq, Transcriptomics, GeneSetEnrichment, GeneRegulation, 

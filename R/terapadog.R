@@ -6,8 +6,6 @@
 #'  It also prepares the metatadata needed by padog (exp_de).
 #' @importFrom KEGGREST keggLink keggList
 #' @importFrom DESeq2 DESeqDataSetFromMatrix DESeq results
-#' @importFrom foreach foreach
-#' @importFrom doRNG %dorng%
 #' @importFrom utils combn
 #' @importFrom methods is
 #' @importFrom stats var quantile sd na.omit
@@ -32,26 +30,13 @@
 #' significance p-values.
 #' @param Nmin The minimum size of gene sets to be included in the analysis.
 #' @param verbose Logical. If true, shows number of iterations done.
-#' @param parallel Logical. Allows for parallel execution to speed up.
-#' @param dseed Integer. For serial execution, users can forgo this or just use
-#' `set.seed()` before calling the function, if they desire reproducibility.
-#' For parrallel execution (`parallel = TRUE`) setting `dseed` is mandatory.
-#' The function will raise an error if no seed is given.
-#' @param ncr The number of CPU cores used when parallel set to TRUE.
-#' Default is to use all CPU cores detected
 #' @return A dataframe with the PADOG score for each pathway in exam.
 #' @export
 #'
 #'
 terapadog <- function (esetm = NULL, exp_de = NULL, paired = FALSE,
                        gslist = "KEGGRESTpathway", organism = "hsa" ,
-                       gs.names = NULL, NI = 1000, Nmin = 3, verbose = TRUE,
-                       parallel = FALSE, dseed = NULL, ncr = NULL) {
-
-  # validity checks of the data
-  if (parallel && is.null(dseed)) {
-    stop("Please provide 'dseed' for reproducible parallel execution.")
-  }
+                       gs.names = NULL, NI = 1000, Nmin = 3, verbose = TRUE) {
 
   # Initial checks on the data (as PADOG would do). Some have been modified/removed to fit new kind of data.
   if (length(gslist) == 1 && gslist == "KEGGRESTpathway") {
@@ -287,49 +272,6 @@ terapadog <- function (esetm = NULL, exp_de = NULL, paired = FALSE,
     })
   }
 
-  if (parallel && requireNamespace("doParallel", quietly = TRUE) &&
-      requireNamespace("parallel", quietly = TRUE)) {
-    ncores <- parallel::detectCores()
-    if (!is.null(ncr))
-      ncores <- min(ncores, ncr)
-    if (verbose) {
-      clust <- parallel::makeCluster(ncores, outfile = "")
-    }
-    else {
-      clust <- parallel::makeCluster(ncores)
-    }
-    doParallel::registerDoParallel(clust)
-    tryCatch({
-      parRes <- foreach::foreach(ite = 1:(NI + 1), .combine = "c",
-                        .packages = "DESeq2",
-                        .options.RNG = dseed) %dorng% { # original: .packages = "limma"
-                          Sres <- gsScoreFun(G, block)
-                          tmp <- list(t(Sres))
-                          names(tmp) <- ite
-                          if (verbose && (ite%%10 == 0)) {
-                            cat(ite, "/", NI, "\n")
-                          }
-                          tmp
-                        }
-      parRes <- do.call(cbind, parRes[order(as.numeric(names(parRes)))])
-      evenCol <- (1:ncol(parRes))%%2 == 0
-      MSabsT[] <- parRes[, !evenCol]
-      MSTop[] <- parRes[, evenCol]
-      rm(parRes)
-    }, finally = parallel::stopCluster(clust))
-  }
-  else {
-    if (parallel)
-      message("Execute in serial! Packages 'doParallel' and 'parallel'\n needed for parallelization!")
-    for (ite in 1:(NI + 1)) {
-      Sres <- gsScoreFun(G, block)
-      MSabsT[, ite] <- Sres[1, ]
-      MSTop[, ite] <- Sres[2, ]
-      if (verbose && (ite%%10 == 0)) {
-        cat(ite, "/", NI, "\n")
-      }
-    }
-  }
   meanAbsT0 <- MSabsT[, 1]
   padog0 <- MSTop[, 1]
   MSabsT <- scale(MSabsT)

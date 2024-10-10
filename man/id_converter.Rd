@@ -8,13 +8,15 @@ entrezgene_id format for the analysis.}
 id_converter(esetm, id_type)
 }
 \arguments{
-\item{esetm}{A dataframe with the gene count values.}
+\item{esetm}{A matrix with the gene count values and whose rawnames are the
+gene Ids (gene symbol or ensembl gene ID).}
 
 \item{id_type}{A string representing the type of ID given as input. Must be
 either hgnc_symbol or ensembl_gene_id.}
 }
 \value{
-A dataframe with gene IDs in the entrezgene_id format.
+A matrix with gene IDs in the entrezgene_id format. Also provides a
+report on the duplicated mappings (conversion_report.txt) in the working dir.
 }
 \description{
 Convert the human gene identifier (hgnc_symbol or ensembl_gene_id) to
@@ -22,12 +24,14 @@ entrezgene_id format for the analysis.
 }
 \examples{
 # To showcase this internal function, a small example is made.
-gene_ids <- c('ENSG00000103197', 'ENSG00000008710', 'ENSG00000167964')
-esetm <- data.frame(
-Sample1 = c(2.5, 3.1, 5.2),
-Sample2 = c(4.1, 2.9, 6.3),
-Sample3 = c(1.5, 3.7, 4.8),
-row.names = gene_ids)
+gene_ids <- c('ENSG00000103197', 'ENSG00000008710', 'ENSG00000167964'
+, 'ENSG00000167964')
+esetm <- matrix(c(
+2.5, 3.1, 5.2, 0.1,
+4.1, 2.9, 6.3, 0.5,
+1.5, 3.7, 4.8, 0.1), nrow = 4, byrow = FALSE)
+rownames(esetm) <- gene_ids
+colnames(esetm) <- c("Sample 1", "Sample 2", "Sample 3")
 # Call the function
 esetm <- id_converter(esetm, "ensembl_gene_id")
 print(head(esetm))

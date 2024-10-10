@@ -15,10 +15,7 @@ terapadog(
   gs.names = NULL,
   NI = 1000,
   Nmin = 3,
-  verbose = TRUE,
-  parallel = FALSE,
-  dseed = NULL,
-  ncr = NULL
+  verbose = TRUE
 )
 }
 \arguments{
@@ -51,16 +48,6 @@ significance p-values.}
 \item{Nmin}{The minimum size of gene sets to be included in the analysis.}
 
 \item{verbose}{Logical. If true, shows number of iterations done.}
-
-\item{parallel}{Logical. Allows for parallel execution to speed up.}
-
-\item{dseed}{Integer. For serial execution, users can forgo this or just use
-`set.seed()` before calling the function, if they desire reproducibility.
-For parrallel execution (`parallel = TRUE`) setting `dseed` is mandatory.
-The function will raise an error if no seed is given.}
-
-\item{ncr}{The number of CPU cores used when parallel set to TRUE.
-Default is to use all CPU cores detected}
 }
 \value{
 A dataframe with the PADOG score for each pathway in exam.
