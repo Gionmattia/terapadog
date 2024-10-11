@@ -1,17 +1,9 @@
-Condition	SeqType	SampleName
-2	RIBO	s2424
-2	RIBO	s2724
-2	RIBO	s3424
-2	RIBO	s4124
-1	RIBO	s24
-1	RIBO	s27
-1	RIBO	s34
-1	RIBO	s41
-2	RNA	s2424
-2	RNA	s2724
-2	RNA	s3424
-2	RNA	24124
-1	RNA	s24
-1	RNA	s27
-1	RNA	s34
-1	RNA	s41
+SampleName	Condition
+s2424	2
+s2724	2
+s3424	2
+s4124	2
+s24	1
+s27	1
+s34	1
+s41	1
