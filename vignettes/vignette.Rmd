@@ -23,11 +23,14 @@ vignette: >
 # Introduction
 
 Welcome to the official (and only) documentation about TERAPADOG 
-(***T**ranslational **E**fficiency **R**egulation **A**nalysis & **P**athway **A**nalysis with **D**own-weighting of **O**verlapping **G**enes*).
+(***T**ranslational **E**fficiency **R**egulation **A**nalysis & **P**athway 
+**A**nalysis with **D**own-weighting of **O**verlapping **G**enes*).
 
 ### What is TERAPADOG?
 
-To put is short, TERAPADOG is an implementation of the classic PADOG aglorithm (Pathway Analysis with Down-weighting of Overlapping Genes), but on top of the results of a Differential Translational Analysis (executed with DeltaTE).
+To put is short, TERAPADOG is an implementation of the classic PADOG aglorithm 
+(Pathway Analysis with Down-weighting of Overlapping Genes), but on top of the 
+results of a Differential Translational Analysis (executed with DeltaTE).
 Now that the scientific jargon is out, let's delve a bit more into the topic.
 
 Works on human only!
@@ -62,7 +65,10 @@ A possible strategy to ease this step is to map this information on biological
 pathways, so to obtain an overarching perspective showing how the different 
 genes undergoing TE regulation are linked together.
 
-It is from this idea that ***terapadog*** was conceived: to be able to perform a gene set analysis (applying the same logic as used in the PADOG package, see references for additional info) on the sets highlighted as being actively under Translational Efficiency changes.
+It is from this idea that ***terapadog*** was conceived: to be able to perform a
+gene set analysis (applying the same logic as used in the PADOG package, see 
+references for additional info) on the sets highlighted as being actively under 
+Translational Efficiency changes.
 
 ### The bigger picture: integration within ReactomeGSA
 
@@ -107,7 +113,7 @@ ReactomeGSA - Efficient Multi-Omics Comparative Pathway Analysis, Molecular
 
 
 
-# Installation
+# Installation & Loading
 
 To install the terapadog package, execute the following code:
 
@@ -117,10 +123,11 @@ if (!require("BiocManager", quietly = TRUE))
 
 BiocManager::install("terapadog")
 ```
-
-# Package Structure
-
-
+Also remember to load the library before calling its functions.
+```{r}
+# Load the library
+library(terapadog)
+```
 
 # Analysis Walktrough
 
@@ -224,7 +231,7 @@ Your count file must be in either a comma-separated values (.csv) or a
 tab-separated values (.tsv). Other extensions are currently not supported by
 terapadog.
 
-## prepareTerapadogData
+## **prepareTerapadogData()**
 
 Now that your input files are ready to go, we can start the terapadog workflow.
 First thing first, you will have to call the function 
@@ -258,12 +265,11 @@ counts for each gene in exam.
 
 
 ```{r}
-# Load the library
-library(terapadog)
-
 # Read the paths in your R environments
-path_rna_counts <- system.file("extdata", "rna_counts.tsv", package = "terapadog")
-path_ribo_counts <- system.file("extdata", "ribo_counts.tsv", package = "terapadog")
+path_rna_counts <- system.file("extdata", "rna_counts.tsv", 
+                               package = "terapadog")
+path_ribo_counts <- system.file("extdata", "ribo_counts.tsv", 
+                                package = "terapadog")
 sample_info_path <- system.file("extdata", "sample_info.tsv",
                                 package = "terapadog")
 
@@ -289,17 +295,21 @@ exp_de <- prep_data$exp_de
 print(exp_de)
 ```
 
-## Executing the analysis
+## id_converter()
+
+## terapadpg()
+
+## get_FCs()
+
+## plotDTA()
 
 ## Saving the results
 
-## Something
-
 # References
 
-Testing data from
+Testing data from github
 
-deltaTE tool
+deltaTE 
 
 lfcShrink from apeglm
 
