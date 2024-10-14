@@ -9,7 +9,7 @@
 #' @importFrom biomaRt useMart getBM
 #' @importFrom stats setNames
 #' @importFrom utils write.table
-#' @param esetm A matrix with the gene count values and whose rawnames are the
+#' @param esetm A matrix with the gene count values and whose rownames are the
 #' gene Ids (gene symbol or ensembl gene ID).
 #' @param id_type A string representing the type of ID given as input. Must be
 #' either hgnc_symbol or ensembl_gene_id.

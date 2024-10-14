@@ -131,6 +131,14 @@ get_FCs <- function(expression.data, exp_de, paired = FALSE) {
 
   res_combined <- assign_Regmode(res_combined)
 
+  # Remove the unnecessary columns
+  res_combined <- res_combined[, !names(res_combined) %in%
+                                 c("baseMean", "lfcSE", "stat", "pvalue")]
+
+  # Rename the columns for consistency and easiness of interpretation
+  names(res_combined)[names(res_combined) == "log2FoldChange"] <- "TE_FC"
+  names(res_combined)[names(res_combined) == "padj"] <- "TE_padj"
+
   # Reorder columns
   col_order <- c("Identifier", colnames(res_combined)[1:ncol(res_combined)])
 

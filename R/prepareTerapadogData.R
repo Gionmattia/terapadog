@@ -85,6 +85,10 @@ prepareTerapadogData <- function (path_to_RNA_counts, path_to_RIBO_counts,
   metadata <- utils::read.table(path_to_metadata, sep = detect_separator(
     path_to_metadata), header = TRUE)
   exp_de$Condition <- metadata$Condition[match(exp_de$SampleName, metadata$SampleName)]
+  # If there is info on paired design (Block column) add it to the dataframe
+  if ("Block" %in% colnames(metadata)) {
+    exp_de$Block <- metadata$Block[match(exp_de$SampleName, metadata$SampleName)]
+  }
 
   # Reformat baseline and target to "c" and "d"
   baseline <- ifelse(grepl(analysis.group.1, exp_de$Condition), 1,
