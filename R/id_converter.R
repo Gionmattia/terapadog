@@ -62,9 +62,10 @@ id_converter <- function(esetm, id_type) {
   )
 
   # Write the explanation to a file
-  writeLines(report_message, "conversion_report.txt")
+  report_path <- paste0(getwd(),"/conversion_report.txt")
+  writeLines(report_message, report_path)
   # Append the table to the file
-  write.table(duplicated_rows, "conversion_report.txt", append = TRUE,
+  write.table(duplicated_rows, report_path, append = TRUE,
               sep = ",", row.names = FALSE, col.names = TRUE)
 
   # Create a named vector for mapping
