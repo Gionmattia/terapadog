@@ -8,7 +8,7 @@ entrezgene_id format for the analysis.}
 id_converter(esetm, id_type)
 }
 \arguments{
-\item{esetm}{A matrix with the gene count values and whose rawnames are the
+\item{esetm}{A matrix with the gene count values and whose rownames are the
 gene Ids (gene symbol or ensembl gene ID).}
 
 \item{id_type}{A string representing the type of ID given as input. Must be
@@ -23,7 +23,7 @@ Convert the human gene identifier (hgnc_symbol or ensembl_gene_id) to
 entrezgene_id format for the analysis.
 }
 \examples{
-# To showcase this internal function, a small example is made.
+# To showcase thisl internal function, a small example is made.
 gene_ids <- c('ENSG00000103197', 'ENSG00000008710', 'ENSG00000167964'
 , 'ENSG00000167964')
 esetm <- matrix(c(

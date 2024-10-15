@@ -2,9 +2,8 @@
 % Please edit documentation in R/terapadog.R
 \name{terapadog}
 \alias{terapadog}
-\title{This function reads RNA and RIBO count files, checks input data validity and
- merges them into a single numerical matrix (expression.data.
- It also prepares the metatadata needed by padog (exp_de).}
+\title{Performs the main Gene Set Enrichement Analysis, by applying a modified
+version of the PADOG algorithm to genes undergoing changes in TE.}
 \usage{
 terapadog(
   esetm = NULL,
@@ -53,7 +52,6 @@ significance p-values.}
 A dataframe with the PADOG score for each pathway in exam.
 }
 \description{
-This function reads RNA and RIBO count files, checks input data validity and
- merges them into a single numerical matrix (expression.data.
- It also prepares the metatadata needed by padog (exp_de).
+Performs the main Gene Set Enrichement Analysis, by applying a modified
+version of the PADOG algorithm to genes undergoing changes in TE.
 }

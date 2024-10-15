@@ -2,7 +2,10 @@
 % Please edit documentation in R/prepareTerapadogData.R
 \name{prepareTerapadogData}
 \alias{prepareTerapadogData}
-\title{Prepare Data by Loading and Validating RNA, RIBO Counts, and Metadata}
+\title{Prepare Data by Loading and Validating RNA, RIBO Counts, and Metadata.
+This function reads RNA and RIBO count files, checks input data validity and
+merges them into a single numerical matrix (expression.data).
+It also prepares the metatadata needed by padog (exp_de).}
 \usage{
 prepareTerapadogData(
   path_to_RNA_counts,
@@ -31,9 +34,10 @@ against the baseline (e.g., mutant, disease, treatment, etc.).}
 A list containing two data frames: expression.data and exp_de.
 }
 \description{
+Prepare Data by Loading and Validating RNA, RIBO Counts, and Metadata.
 This function reads RNA and RIBO count files, checks input data validity and
- merges them into a single numerical matrix (expression.data).
- It also prepares the metatadata needed by padog (exp_de).
+merges them into a single numerical matrix (expression.data).
+It also prepares the metatadata needed by padog (exp_de).
 }
 \examples{
 # Data is also available in the "extdata" folder of this package.

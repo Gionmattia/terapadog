@@ -1,6 +1,5 @@
 # R/get_FCs.R
 
-#'
 #' This function execute the Differential Translation Analysis on its own
 #' using DeltaTE.
 #' The output is a dataframe with the FC in mRNA counts, RIBO counts or TE
@@ -35,8 +34,6 @@
 #' result <- get_FCs(expression.data, exp_de)
 #' @export
 #'
-#'
-
 get_FCs <- function(expression.data, exp_de, paired = FALSE) {
 
   # DeltaTE cannot manage NA among the levels of a factor, so I need to remove them! (code same as above)

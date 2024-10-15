@@ -1,11 +1,8 @@
-# Conversion to Entrez gene ID
-# This could be used as a preprocessng helper function...
-# or maybe other to the Entrez... this has some potential!
-
 # R/id_converter.R
 
 #' Convert the human gene identifier (hgnc_symbol or ensembl_gene_id) to
 #' entrezgene_id format for the analysis.
+#' @aliases id_converter
 #' @importFrom biomaRt useMart getBM
 #' @importFrom stats setNames
 #' @importFrom utils write.table
@@ -16,7 +13,7 @@
 #' @return A matrix with gene IDs in the entrezgene_id format. Also provides a
 #' report on the duplicated mappings (conversion_report.txt) in the working dir.
 #' @examples
-#' # To showcase this internal function, a small example is made.
+#' # To showcase thisl internal function, a small example is made.
 #' gene_ids <- c('ENSG00000103197', 'ENSG00000008710', 'ENSG00000167964'
 #' , 'ENSG00000167964')
 #' esetm <- matrix(c(
@@ -30,7 +27,6 @@
 #' print(head(esetm))
 #' @export
 #'
-
 id_converter <- function(esetm, id_type) {
 
   if (!(id_type %in% c("hgnc_symbol", "ensembl_gene_id"))) {

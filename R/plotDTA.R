@@ -1,5 +1,5 @@
 # R/plotDTA.R
-#'
+
 #' This function will plot an interactive html plot of the results of get_FCs.R
 #' That is to say, a plot of the genes undergoing translational regulation,
 #' coloured by RegMode.
@@ -21,7 +21,7 @@
 #' )
 #' result <- plotDTA(df, paste0(getwd(), "/manual_example.html"))
 #' @export
-
+#'
 plotDTA <- function(FC_results, path) {
   # Filters out omitted RegModes
   df <- FC_results %>%

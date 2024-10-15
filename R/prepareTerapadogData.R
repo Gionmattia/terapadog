@@ -1,13 +1,9 @@
-# Docs must explain what kind of data is needed! (RAW COUNTS), gene ID as rows, SampleName as column
-#Input data must be either a .csv or .tsv file (with specified file format)
-
 # R/prepareTerapadogData.R
 
-#' Prepare Data by Loading and Validating RNA, RIBO Counts, and Metadata
-#'
+#' Prepare Data by Loading and Validating RNA, RIBO Counts, and Metadata.
 #' This function reads RNA and RIBO count files, checks input data validity and
-#'  merges them into a single numerical matrix (expression.data).
-#'  It also prepares the metatadata needed by padog (exp_de).
+#' merges them into a single numerical matrix (expression.data).
+#' It also prepares the metatadata needed by padog (exp_de).
 #' @importFrom utils read.table
 #' @param path_to_RNA_counts A string representing the file path
 #' to the RNA counts data file (.csv or .tsv).

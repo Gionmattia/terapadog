@@ -1,9 +1,7 @@
 # R/terapadog.R
 
-#'
-#' This function reads RNA and RIBO count files, checks input data validity and
-#'  merges them into a single numerical matrix (expression.data.
-#'  It also prepares the metatadata needed by padog (exp_de).
+#' Performs the main Gene Set Enrichement Analysis, by applying a modified
+#' version of the PADOG algorithm to genes undergoing changes in TE.
 #' @importFrom KEGGREST keggLink keggList
 #' @importFrom DESeq2 DESeqDataSetFromMatrix DESeq results
 #' @importFrom utils combn
@@ -32,7 +30,6 @@
 #' @param verbose Logical. If true, shows number of iterations done.
 #' @return A dataframe with the PADOG score for each pathway in exam.
 #' @export
-#'
 #'
 terapadog <- function (esetm = NULL, exp_de = NULL, paired = FALSE,
                        gslist = "KEGGRESTpathway", organism = "hsa" ,
@@ -270,6 +267,15 @@ terapadog <- function (esetm = NULL, exp_de = NULL, paired = FALSE,
       X <- stats::na.omit(degf[z, , drop = FALSE])
       colMeans(X, na.rm = TRUE) * sqrt(nrow(X))
     })
+  }
+
+  for (ite in 1:(NI + 1)) {
+    Sres <- gsScoreFun(G, block)
+    MSabsT[, ite] <- Sres[1, ]
+    MSTop[, ite] <- Sres[2, ]
+    if (verbose && (ite%%10 == 0)) {
+      cat(ite, "/", NI, "\n")
+    }
   }
 
   meanAbsT0 <- MSabsT[, 1]
