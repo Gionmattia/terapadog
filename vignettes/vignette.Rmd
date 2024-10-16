@@ -448,15 +448,24 @@ plot_FCs <- plotDTA(fc_results, paste0(getwd(), "/manual_example.html"))
 
 # References
 
-Terapadog has ben developed starting from the PADOG  algorithm of anaylisis.
-I do not own the original, just the idea of implementing it on top of DeltaTE 
-for the analysis of translational changes.
+**Discalimer:**
+Terapadog has been developed using the PADOG algorithm of analysis as a blueprint.
+I do not own the original code.
+
+My ownership is limited to the idea of the implementation and any new code written
+in that regard, not to the tools used within, for which authorship is documented
+below:
 
 Tarca AL, Draghici S, Bhatti G. et al. Down-weighting overlapping genes improves gene set analysis. BMC Bioinformatics (2012).
 
 [<https://doi.org/10.1186/1471-2105-13-136>]
 
-Similarly, the idea and data that have been used to test the package are from:
+Similarly, the test data that has been used within this package has been
+retrieved from the github repository relative to the original DeltaTE paper
+(see below).
+I do not claim ownership of the data, and I encourage you to check the 
+extdata_info.md file to see the modifications applied to it for the tutorial
+purposes.
 
 *DeltaTE:*
 
@@ -464,7 +473,7 @@ Chothani S, Adami E, Ouyang JF, Viswanathan S, Hubner N, Cook SA, Schafer S, Rac
 
 [<https://pubmed.ncbi.nlm.nih.gov/31763789/>]
 
-Specifically, DeltaTE it makes use of the  lfcShrink from the apeglm package:
+In addition, DeltaTE makes use of the  lfcShrink function from the apeglm package:
 
 Zhu A, Ibrahim JG, Love MI. Heavy-tailed prior distributions for sequence 
 count data: removing the noise and preserving large differences.vBioinformatics.
@@ -472,8 +481,8 @@ count data: removing the noise and preserving large differences.vBioinformatics.
 
 [<https://doi.org/10.1093/bioinformatics/bty895>]
 
-Finally, I report the ReactomeGSA, since this tool has been developed with the 
-idea in mind to have it integrated with it once published.
+Finally, I reference the ReactomeGSA, since this tool has been developed with the 
+final aim to have it integrated with it once published, as peart of a new analyser.
 
 Griss J, Viteri G, Sidiropoulos K, Nguyen V, Fabregat A, Hermjakob H, ReactomeGSA - Efficient Multi-Omics Comparative Pathway Analysis, Molecular & Cellular Proteomics (2020).
 
