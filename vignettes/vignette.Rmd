@@ -37,7 +37,7 @@ In the last decade, experimental techniques such as Polysome profiling (Polysome
 
 As a result of this, many packages have been developed to study gene regulation from this additional perspective, trying to characterize the changes in the *Translational Efficiency* (TE) each mRNA could undergo between conditions, an analysis which can be commonly referred to as *Differential Translation Analysis* (DTA).
 
-The results of a DTA are usually a list of genes, each categorized into a different *Regulatory Mode* depending on the changes in mRNA levels and TE between the two conditions. Such an output, although informative per se, but is also be quite complex to interpret when it comes to link together the different genes to infer the overarching metabolic shifts happening in the experiment.
+The results of a DTA are usually a list of genes, each categorized into a different *Regulatory Mode* depending on the changes in mRNA levels and TE between the two conditions. Such an output, although informative per se, is also be quite complex to interpret when it comes to link together the different genes to infer the overarching metabolic shifts happening in the experiment.
 
 ### The missing link
 
@@ -99,7 +99,14 @@ This section will guide you thorough the various steps of the analysis, using so
 
 ## Input data: Formatting and Extension
 
-First thing first, you need to make sure your input data is in the right format.
+First thing first, terapadog requires **raw gene counts** as input data. 
+This means your input file should look like a table where row names are gene IDs
+and column names identify different samples (more info on that below).
+The counts should be raw inegers, no normalisation of preparatory step required 
+(those steps are handled by the functions within the package).
+ 
+ 
+Secodnly, you need to make sure your input data is in the right format.
 
 **In order to execute the analysis, it is mandatory input files are correctly formatted, so follow the guidelines detailed below.**
 
