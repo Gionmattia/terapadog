@@ -9,7 +9,8 @@
 #' @importFrom htmlwidgets saveWidget
 #' @param FC_results A matrix containing the counts from RNA and RIBO
 #' samples.
-#' @param path A string, pointing to where to save the html plot.
+#' @param path A string, pointing to where to save the html plot. If none is
+#' given, the plot will be saved to a temporary directory.
 #' @return An interactive html plot.
 #' @examples
 #' # Creates a mock dataframe for this demonstration
@@ -19,10 +20,10 @@
 #'   RNA_FC = c(-0.40, -0.5, NA, 0.01),
 #'   RIBO_FC = c(0.19, -0.3, 0.8, -0.02)
 #' )
-#' result <- plotDTA(df, paste0(getwd(), "/manual_example.html"))
+#' result <- plotDTA(df)
 #' @export
 #'
-plotDTA <- function(FC_results, path) {
+plotDTA <- function(FC_results, path = paste0(tempdir(), "/plot.html") {
   # Filters out omitted RegModes
   df <- FC_results %>%
     dplyr::filter(!(!!dplyr::sym("RegMode") %in% c("Undeterminable", "Undetermined")))

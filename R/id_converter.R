@@ -10,6 +10,8 @@
 #' gene Ids (gene symbol or ensembl gene ID).
 #' @param id_type A string representing the type of ID given as input. Must be
 #' either hgnc_symbol or ensembl_gene_id.
+#' @param outdir Path to a directory where to save the report. If none is given,
+#' a temporary directory will be chosen.
 #' @return A matrix with gene IDs in the entrezgene_id format. Also provides a
 #' report on the duplicated mappings (conversion_report.txt) in the working dir.
 #' @examples
@@ -27,7 +29,7 @@
 #' print(head(esetm))
 #' @export
 #'
-id_converter <- function(esetm, id_type) {
+id_converter <- function(esetm, id_type, outdir = tempdir()) {
 
   if (!(id_type %in% c("hgnc_symbol", "ensembl_gene_id"))) {
     stop("Error: the conversion script only works with
@@ -62,7 +64,7 @@ id_converter <- function(esetm, id_type) {
   )
 
   # Write the explanation to a file
-  report_path <- paste0(getwd(),"/conversion_report.txt")
+  report_path <- paste0(outdir,"/conversion_report.txt")
   writeLines(report_message, report_path)
   # Append the table to the file
   write.table(duplicated_rows, report_path, append = TRUE,

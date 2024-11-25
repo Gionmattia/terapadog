@@ -1,0 +1,514 @@
+---
+title: "**terapadog**: Translational Efficiency Regulation Analysis & Pathway Analysis with Down-weighting of Overlapping Genes"
+author:
+- name: "Gionmattia Carancini"
+  affiliation:
+  - "CRT Genomics Data Sceince"
+  - "LAPTILab, Uninversity College Cork, Ireland"
+  email: gionmattia@gmail.com
+date: "`r Sys.Date()`"
+abstract: >
+  A walktrough to guide the user in using the terapadog package, its functions,
+  and understanding the outputs and results it produces.
+output: BiocStyle::html_document
+vignette: >
+  %\VignetteIndexEntry{terapadog: Translational Efficiency Regulation Analysis & Pathway Analysis with Down-weighting of Overlapping Genes}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+ 
+
+*Per Nonna Ezia, arrivederci e grazie di tutti i dolci (specialmente il rotolone).*
+
+# Introduction
+
+Welcome to the official (and only) documentation about TERAPADOG (***T**ranslational **E**fficiency **R**egulation **A**nalysis & **P**athway **A**nalysis with **D**own-weighting of **O**verlapping **G**enes*).
+
+### What is TERAPADOG?
+
+To put is short, TERAPADOG is an implementation of the classic PADOG aglorithm (Pathway Analysis with Down-weighting of Overlapping Genes), but on top of the results of a Differential Translational Analysis (executed with DeltaTE). Now that the scientific jargon is out, let's delve a bit more into the topic.
+
+Works on human only!
+
+### Differential Translation-what?
+
+In the last decade, experimental techniques such as Polysome profiling (Polysome-Seq) and Ribosome profiling (Ribo-Seq) have widely shown how gene expression is not regulated only at the *transcriptional level* (through the increase/decrease of the pool of mRNA species in the cell), but also at the *translational level* (through the active increase/decrease of the *efficiency* these mRNAs are translated to protein).
+
+As a result of this, many packages have been developed to study gene regulation from this additional perspective, trying to characterize the changes in the *Translational Efficiency* (TE) each mRNA could undergo between conditions, an analysis which can be commonly referred to as *Differential Translation Analysis* (DTA).
+
+The results of a DTA are usually a list of genes, each categorized into a different *Regulatory Mode* depending on the changes in mRNA levels and TE between the two conditions. Such an output, although informative per se, is also be quite complex to interpret when it comes to link together the different genes to infer the overarching metabolic shifts happening in the experiment.
+
+### The missing link
+
+As stated above, a list of hundreds (if not thousands) of genes can be difficult to interpret from a systemic perspective. A possible strategy to ease this step is to map this information on biological pathways, so to obtain an overarching perspective showing how the different genes undergoing TE regulation are linked together.
+
+It is from this idea that ***terapadog*** was conceived: to be able to perform a gene set analysis (applying the same logic as used in the PADOG package, see references for additional info) on the sets highlighted as being actively under Translational Efficiency changes.
+
+### The bigger picture: integration within Reactome and its Gene Set Analysis
+
+While ***terapadog*** can be run as a standalone tool (as shown in this vignette), it was originally designed to serve as an additional analysis method available within the Reactome Pathway Analysis framework
+[Reactome GSA](https://reactome.org/gsa/home).
+
+As a standalone tool, ***terapadog*** enables users to investigate genes undergoing changes in translational efficiency (TE) and the pathways they are involved in. However, it does not provide the high-level exploration and visualization features offered by Reactome.
+
+We kindly encourage you to try ***terapadog*** within the Reactome platform (see the link above) to fully benefit from its user-friendly interface and powerful visualisation tools.
+
+### Suggested Reading
+
+For more information regarding PADOG or DeltaTE and Regulatory Modes, please refer to the paper mentioned in the references section of this vignette.
+
+*About Differential Translation Analysis:*
+
+Chothani S, Adami E, Ouyang JF, Viswanathan S, Hubner N, Cook SA, Schafer S, Rackham OJL. deltaTE: Detection of Translationally Regulated Genes by Integrative Analysis of Ribo-seq and RNA-seq Data. Curr Protoc Mol Biol. (2019).
+
+[<https://pubmed.ncbi.nlm.nih.gov/31763789/>]
+
+*About PADOG:*
+
+Tarca AL, Draghici S, Bhatti G. et al. Down-weighting overlapping genes improves gene set analysis. BMC Bioinformatics (2012).
+
+[<https://doi.org/10.1186/1471-2105-13-136>]
+
+*About the ReactomeGSA:*
+
+Griss J, Viteri G, Sidiropoulos K, Nguyen V, Fabregat A, Hermjakob H, ReactomeGSA - Efficient Multi-Omics Comparative Pathway Analysis, Molecular & Cellular Proteomics (2020).
+
+[<https://doi.org/10.1074/mcp.TIR120.002155>]
+
+# Installation & Loading
+
+To install the terapadog package, execute the following code:
+
+```{r install, echo = TRUE, eval=FALSE}
+if (!require("BiocManager", quietly = TRUE))
+    install.packages("BiocManager")
+
+BiocManager::install("terapadog")
+```
+
+Also remember to load the library before calling its functions.
+
+```{r}
+# Load the library
+library(terapadog)
+```
+
+# Analysis Walktrough
+
+This section will guide you thorough the various steps of the analysis, using some testing data. The data used at this stage is the same used by Chotani S. et al. in their paper on DeltaTE and has been retrieved from their github repository. Any manipulation on the data has been detailed in the *extdata_info.md* file (see scripts folder of the package).
+
+[<https://github.com/SGDDNB/translational_regulation.git>]
+
+## Input data: Formatting and Extension
+
+First thing first, terapadog requires **raw gene counts** as input data. 
+This means your input file should look like a table where row names are gene IDs
+and column names identify different samples (more info on that below).
+The counts should be raw inegers, no normalisation of preparatory step required 
+(those steps are handled by the functions within the package).
+ 
+ 
+Secodnly, you need to make sure your input data is in the right format.
+
+**In order to execute the analysis, it is mandatory input files are correctly formatted, so follow the guidelines detailed below.**
+
+1)  ***Samples Naming***
+
+In a DTA, you will have RNA-Seq counts and Ribo-Seq counts coming from the same sample. That is to say, for "Sample A" you will have a set of gene counts obtained from RNA-Seq and a set obtained from the Ribo-Seq protocol.
+
+**It is mandatory for the sample name to be the same in both RNA-Seq and RIBO-Seq count files.**
+
+*Example of RNA-Seq file:*
+
+| GeneId   | Sample_A | Sample_B | Sample_C | Sample_D |
+|----------|----------|----------|----------|----------|
+| ENSG0001 | 657      | 598      | 645      | 603      |
+| ENSG0002 | 342      | 389      | 350      | 329      |
+
+```{r, echo =FALSE}
+# Tutorial Example
+rna_counts <- system.file("extdata", "rna_counts.tsv", package = "terapadog")
+rna_data <- read.csv(rna_counts, sep = "\t")
+
+# Check the data
+head(rna_data)
+```
+
+*Example of Ribo-Seq file:*
+
+| GeneId   | Sample_A | Sample_B | Sample_C | Sample_D |
+|----------|----------|----------|----------|----------|
+| ENSG0001 | 100      | 102      | 120      | 115      |
+| ENSG0002 | 700      | 658      | 712      | 707      |
+
+```{r, echo=FALSE}
+# Tutorial Example
+ribo_counts <- system.file("extdata", "ribo_counts.tsv", package = "terapadog")
+ribo_data <- read.csv(ribo_counts, sep = "\t")
+
+# Check the data
+head(ribo_data)
+```
+
+Yes, they look almost identical in the formatting, with only the count values as a striking difference. It is intended, don't worry.
+
+2)  ***Sample Info file*** This file is basically a table where each Sample is linked to the experimental condition you are assessing (for instance, control and disease). It has only two columns:
+
+-   *SampleName*, the name of the sample.
+-   *Condition*, the experimental condition for said sample.
+
+**It is mandatory the columns of this file are named with these specific names and capitalization.**
+
+*Example of Sample info file:*
+
+| SampleName | Condition |
+|------------|-----------|
+| Sample_A   | ctrl      |
+| Sample_B   | disease   |
+| Sample_C   | ctrl      |
+| Sample_D   | disease   |
+
+```{r echo=FALSE}
+# Tutorial Example
+sample_info_path <- system.file("extdata", "sample_info.tsv",
+                                package = "terapadog")
+sample_info <- read.csv(sample_info_path, sep = "\t")
+
+# Check the data
+sample_info
+```
+If the SampleName was different between RNA-Seq counts and Ribo-Seq counts, you would have to compile 16 rows instead of just 8 in the sample info file. This is one of the (user-wise) reasons why the names must match.
+
+**About paired experimental designs:**
+
+
+Terapadog also supports paired experimental designs, when it's important to link
+samples together in the analysis (for instance, when observing the response to
+treatment in different patients. Each patient will have a pair of observations).
+To do so, you need to include the pairing information in your metadata, within 
+the "Block" column.
+
+See example below:
+
+*Example of Sample info file with Block column:*
+
+| SampleName | Condition |  Block |
+|------------|-----------|-----------|
+| Sample_A   | before_treatment      | Patient_1
+| Sample_B   | after_treatment   | Patient_1
+| Sample_C   | before_treatment      | Patient_2
+| Sample_D   | after_treatment   | Patient_2
+
+
+
+3)  ***File Format*** Your count file must be in either a comma-separated values (.csv) or a tab-separated values (.tsv). Other extensions are currently not supported by terapadog.
+
+## **prepareTerapadogData()**
+
+Now that your input files are ready to go, we can start the terapadog workflow. First thing first, you will have to call the function ***preparedTerapadogData*** to load the files in your R environment and start the preprocessing operations.
+
+***preparedTerapadogData*** requires the following argument as *string* inputs:
+
+-   *The path to the RNA-Seq counts file.*
+
+-   *The path to the Ribo-Seq counts file.*
+
+-   *The path to the sample info file.*
+
+-   *The name of the condition you want to use as baseline in the comparison.*
+
+    For instance, if you have "control" and "disease" as conditions, "control" is the baseline.
+
+-   *The name of the condition you want to use as target in the comparison.*
+
+    For instance, if you have "control" and "disease" as conditions, "disease" is the target.
+
+For tutorial purposes, this package comes with the three files you will need to carry out a full terapadog analsysis.
+
+-   An RNA-Seq count file (*rna_counts.tsv*), which contains the mRNA-Seq derived counts for each gene in exam.
+-   A Ribo-Seq count file (*ribo_counts.tsv*), which contains the Ribo-Seq derived counts for each gene in exam.
+-   A sample info file (*sample_info.tsv*), which links each sample to a condition (in this case *1* or *2*).
+
+```{r}
+# Read the paths in your R environments
+path_rna_counts <- system.file("extdata", "rna_counts.tsv", 
+                               package = "terapadog")
+path_ribo_counts <- system.file("extdata", "ribo_counts.tsv", 
+                                package = "terapadog")
+sample_info_path <- system.file("extdata", "sample_info.tsv",
+                                package = "terapadog")
+
+# Call prepareTerapadogData
+prep_data <- terapadog::prepareTerapadogData(path_rna_counts, path_ribo_counts,
+                                  sample_info_path,"1", "2")
+
+```
+
+The result of this function will be a list with two elements:
+
+-   A matrix containing the counts from the RNA-Seq and Ribo-Seq files, formatted.
+
+-   A dataframe with all the info relative to the experimental design, 
+which have been derived from sample_info, the two count files and the specified 
+comparison.
+
+```{r}
+# Extract the matrix
+expression.data <- prep_data$expression.data
+print(head(expression.data))
+
+# Extract the experimental design dataframe
+exp_de <- prep_data$exp_de
+print(exp_de)
+```
+
+## **id_converter()**
+
+The function terapadog() requires the input ID to be given in the form of 
+***"entrezgene_id"***.
+This function allows for the conversion from ***"ensembl_gene_id"*** or 
+***"hgnc_symbol"***.
+
+When converting from one system to another, a common issue is having multiple
+mappings: that is to say, several IDs in the original format map to the same 
+entrezgene_id.
+
+In the context of this function, multiple mappings are aggregated (by sum) and 
+a small report .txt file is produced in the working directory, allowing the user 
+to see which duplicate IDs were aggregated once this step is done.
+
+***id_converter()*** requires the following argument as inputs:
+
+-   *A matrix with the gene count values and whose rownames are the gene Ids.*
+
+-   *A string representing the type of ID given as input. Either "hgnc_symbol" *
+    *or "ensembl_gene_id".*
+
+```{r, echo = TRUE, eval=FALSE}
+# Example of function calling
+expression.data <- id_converter(expression.data, "ensembl_gene_id")
+```
+
+The result of this function will be: 
+
+-   A matrix with the rownames now converted to "entrezgene_id".
+
+-   A "conversion_report.txt" file, which details which duplicate IDs were
+aggregated.
+
+## **terapadog()**
+
+This is the main function that names the full package. It perform the Gene Set 
+Anaylsis on the genes that exhibit a significant change in Translation Efficiency
+(TE) between two conditions.
+It has several inputs, of which only two (esetm and exp_de) are *strictly* 
+required to perform the analysis.
+
+- ***esetm***: *A matrix containing the RNA-Seq Counts and Ribo-Seq counts,* 
+*with the gene IDs as entrezgene_ids (argument esetm).*
+*Please refer to the sections above (prepareTerapadogData() and id_converter())*
+*for further info.*
+
+- ***exp_de***: *A dataframe containing the information regarding the samples* 
+*and the experimental design.* 
+*Please refer to the sections above (prepareTerapadogData()) for further info.*
+
+- ***paired***: *A logical value. Allows for experimental designs where samples*
+*are paired (for instance, a study on the response of patients to a drug).*
+*This argument is optional.*
+*Remember, if you set this to TRUE, you must have tha pairing info specified as* 
+*the "Block" column of your metadata (see section 3.1 of the vignette)*
+
+- ***gslist***: *A list of named character vectors. Each vector is named after a*
+*KEGG pathway ID and each element within the vector is an ENSEMBL gene ID for*
+*a gene part of said pathway. This argument is optional.*
+
+- ***organism***: *A string of three letters, giving the name of the organism in*
+*exam as supported by the "KEGGREST" package. Default is "hsa".*
+*This argument is optional.*
+
+- ***gs.names***: *A character vector with the names of the gene sets. Must have*
+*the same length as gslist. This argument is optional.*
+
+- ***NI***: *Number of iterations allowed to determine the gene set score*
+*significance and p-value. Default is 1000. This argument is optional.*
+
+- ***Nmin***: *The minimum size of gene sets to be included in the analysis.*
+*Default is 3. This argument is optional.*
+
+- ***verbose***: *A logical value. Displays the number of iterations done.*
+*Default is TRUE. This argument is optional.*
+
+***A footnote for the scared user:***
+*The function requires many optional parameters because of its integration within* 
+*the ReactomeGSA, where flexibility on said options are required.*
+*In the context of an independent user, only the first two (or three if the* 
+*samples are paired) should be enough to run the analysis!*
+
+Since running terapadog can be computationally intesive, only a non-runnable 
+example of the code will be provided:
+
+```{r, echo = TRUE, eval=FALSE}
+# Calling terapadog
+results <- terapadog(esetm = expression.data, exp_de = exp_de)
+```
+
+The final result of the analysis is a data frame with the following columns:
+
+- *Name*. The name of the gene set (pathway), as retrieved from KEGG.
+- *ID*. The Id of said pathway.
+- *Size*. The number of genes part of the enriched gene set/pathway.
+- *meanAbsT0*. This is the observed mean of the absolute statistic 
+(in this case the padj) for all genes within a gene set, 
+calculated without applying the PADOG weighting scheme. That is to say,
+no downweight has been applied to genes appearing in multiple patjhways.
+- *padog0*. The observed PADOG statistic for the gene set, it incorporates the
+weight for those genes appearing in multiple pathways.
+Higher values indicate the gene set/pathway to be more significantly associated
+with the condition in exam in the experiment.
+- *PmeanAbsT*. This is the p-value corresponding to the meanAbsT0 statistic, 
+calculated through permutation testing (before applying the weighting scheme).
+- *Ppadog*. This is the p-value corresponding to the PADOG statistic (padog0), 
+calculated via permutation testing.
+
+These results are the same of the PADOG algorithm, though it is important to 
+remind that terapadog uses the padj instead of the T0 in its internal calculations
+(due to the design of the implementation with DeltaTE), so some ranges (for those 
+values that were calculated fro the T0) might seem different to the experienced 
+user.
+For all intent and purposes, just keep in mind that the algorithm follows the same 
+logic and, as such, the output reflects that same ideas.
+
+If you want to check if a pathway is significantly enriched, 
+look at the padog0 score (higher = enriched) and at the Ppadog for the significance.
+
+## **get_FCs()**
+
+This functions perform the Differential Translation Analysis (DTA) on its own.
+It allows the user to see how each gene is regulated in terms of TE and RNA fold
+changes, while also categorizing each gene into a different Regulatory Mode.
+It requires the following parameters:
+
+- ***expression.data***: *A matrix containing the RNA-Seq Counts and Ribo-Seq*
+*counts. You can either give the matrix as it is in output from*
+*prepareTerapadogData() or convert the gene IDs displayed using id_converter().*
+*Please refer to the sections above (prepareTerapadogData() and id_converter())*
+*for further info.*
+
+- ***exp_de***: *A dataframe containing the information regarding the samples* 
+*and the experimental design.* 
+*Please refer to the sections above (prepareTerapadogData()) for further info.*
+
+- ***paired***: *A logical value. Allows for experimental designs where samples*
+*are paired (for instance, a study on the response of patients to a drug).*
+*This argument is optional.*
+*Remember, if you set this to TRUE, you must have tha pairing info specified as* 
+*the "Block" column of your metadata (see section 3.1 of the vignette)*
+
+```{r}
+# Execute the analysis
+fc_results <- get_FCs(expression.data, exp_de)
+
+# Print the results
+print(head(fc_results))
+```
+
+The result of this function is a data frame with the following columns:
+
+- *TE_FC*. The Log2 FC of the TE.
+- *TE_padj*. The adjusted p-value for the analysis of the TE changes.
+- *RIBO_FC*. The Fold Change in the Ribo-Seq (or Polysome-Seq) derived counts.
+- *RIBO_padj*. The adjusted p-value for the above Fold Change.
+- *RNA_FC*. The Fold Change in the RNA-Seq derived counts.
+- *RNA_padj*. The adjusted p-value for the above Fold Change.
+- *RegMode*. The Regulatory Mode the genes fall into.
+- *RegModeExplicit*. A more verbose description of each Regulatory mode.
+
+The various RegModes are reported as defined in Chotani et al. paper cited 
+thoughout this vignette, exception for *Undeterminable* (genes who have NA in
+one or more samples), and *Undetermined* (genes who cannot be assigned to any 
+RegMode, as defined in Chotani et al. paper).
+
+## **plotDTA()**
+
+This function plots the results of the get_FCs() function to an interactive html
+plot. It has been made with the idea of being a helper in the visualisation of 
+the results.
+It skips the genes under "Undeterminable" and "Undetermined" RegModes, since 
+they would clutter the plot without adding any value to it.
+It requires the following parameters:
+
+- ***FC_results***: *The results of the get_FCs function.*
+
+- ***path***: *The full path (name included) where you want to save the plot.*
+*Remember to add the .html extension to the plot!*
+
+```{r}
+# Execute the function
+plot_FCs <- plotDTA(fc_results, paste0(getwd(), "/manual_example.html"))
+```
+
+# References
+
+**Discalimer:**
+Terapadog has been developed using the PADOG algorithm of analysis as a blueprint.
+I do not own the original code.
+
+My ownership is limited to the idea of the implementation and any new code written
+in that regard, not to the tools used within, for which authorship is documented
+below:
+
+Tarca AL, Draghici S, Bhatti G. et al. Down-weighting overlapping genes improves gene set analysis. BMC Bioinformatics (2012).
+
+[<https://doi.org/10.1186/1471-2105-13-136>]
+
+Similarly, the test data that has been used within this package has been
+retrieved from the github repository relative to the original DeltaTE paper
+(see below).
+I do not claim ownership of the data, and I encourage you to check the 
+extdata_info.md file to see the modifications applied to it for the tutorial
+purposes.
+
+*DeltaTE:*
+
+Chothani S, Adami E, Ouyang JF, Viswanathan S, Hubner N, Cook SA, Schafer S, Rackham OJL. deltaTE: Detection of Translationally Regulated Genes by Integrative Analysis of Ribo-seq and RNA-seq Data. Curr Protoc Mol Biol. (2019).
+
+[<https://pubmed.ncbi.nlm.nih.gov/31763789/>]
+
+In addition, DeltaTE makes use of the  lfcShrink function from the apeglm package:
+
+Zhu A, Ibrahim JG, Love MI. Heavy-tailed prior distributions for sequence 
+count data: removing the noise and preserving large differences.vBioinformatics.
+(2018)
+
+[<https://doi.org/10.1093/bioinformatics/bty895>]
+
+Finally, I reference the ReactomeGSA, since this tool has been developed with the 
+final aim to have it integrated with it once published, as peart of a new analyser.
+
+Griss J, Viteri G, Sidiropoulos K, Nguyen V, Fabregat A, Hermjakob H, ReactomeGSA - Efficient Multi-Omics Comparative Pathway Analysis, Molecular & Cellular Proteomics (2020).
+
+[<https://doi.org/10.1074/mcp.TIR120.002155>]
+
+# Ackwoledgements
+
+My PhD is supported by Science Foundation Ireland, 
+Centre for Research Training in Genomics Data Science [18/CRT/6214].
+
+This package has been devolped as part of a collaboration between my hosting 
+istitution (University College Cork, Cork, Ireland) and the European
+Bioinformatics Institute (EMBL-EBI, Hinxton, UK).
+
+A special thanks goes to Henning Hermanjacob and Alexander Gretner for the 
+support, and to all the Reactome/EBI team for the patience.
+
+Finally, to you, who have read all the vignette up to here. Hopefully, I have
+been clear and explanatory enough in the use of the package.
+
+# SessionInfo
+
+```{r session-info, echo = FALSE}
+# Displays the session information
+sessionInfo()
+```
