@@ -7,13 +7,14 @@ That is to say, a plot of the genes undergoing translational regulation,
 coloured by RegMode.
 Genes whose RegMode was Undeterminable or Undetermined are omitted.}
 \usage{
-plotDTA(FC_results, path)
+plotDTA(FC_results, path = paste0(tempdir(), "/plot.html"))
 }
 \arguments{
 \item{FC_results}{A matrix containing the counts from RNA and RIBO
 samples.}
 
-\item{path}{A string, pointing to where to save the html plot.}
+\item{path}{A string, pointing to where to save the html plot. If none is
+given, the plot will be saved to a temporary directory.}
 }
 \value{
 An interactive html plot.
@@ -32,5 +33,5 @@ df <- data.frame(
   RNA_FC = c(-0.40, -0.5, NA, 0.01),
   RIBO_FC = c(0.19, -0.3, 0.8, -0.02)
 )
-result <- plotDTA(df, paste0(getwd(), "/manual_example.html"))
+result <- plotDTA(df)
 }

@@ -5,7 +5,7 @@
 \title{Convert the human gene identifier (hgnc_symbol or ensembl_gene_id) to
 entrezgene_id format for the analysis.}
 \usage{
-id_converter(esetm, id_type)
+id_converter(esetm, id_type, outdir = tempdir())
 }
 \arguments{
 \item{esetm}{A matrix with the gene count values and whose rownames are the
@@ -13,6 +13,9 @@ gene Ids (gene symbol or ensembl gene ID).}
 
 \item{id_type}{A string representing the type of ID given as input. Must be
 either hgnc_symbol or ensembl_gene_id.}
+
+\item{outdir}{Path to a directory where to save the report. If none is given,
+a temporary directory will be chosen.}
 }
 \value{
 A matrix with gene IDs in the entrezgene_id format. Also provides a

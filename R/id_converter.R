@@ -28,7 +28,6 @@
 #' esetm <- id_converter(esetm, "ensembl_gene_id")
 #' print(head(esetm))
 #' @export
-#'
 id_converter <- function(esetm, id_type, outdir = tempdir()) {
 
   if (!(id_type %in% c("hgnc_symbol", "ensembl_gene_id"))) {

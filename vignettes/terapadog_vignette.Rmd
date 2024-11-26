@@ -275,8 +275,10 @@ mappings: that is to say, several IDs in the original format map to the same
 entrezgene_id.
 
 In the context of this function, multiple mappings are aggregated (by sum) and 
-a small report .txt file is produced in the working directory, allowing the user 
+a small report .txt file is created by the user-specified path, allowing the user 
 to see which duplicate IDs were aggregated once this step is done.
+If no path is provided, the report will be generated in a temporary directory (
+use *tempdir()* to see which one.
 
 ***id_converter()*** requires the following argument as inputs:
 
@@ -284,6 +286,8 @@ to see which duplicate IDs were aggregated once this step is done.
 
 -   *A string representing the type of ID given as input. Either "hgnc_symbol" *
     *or "ensembl_gene_id".*
+    
+-   *The output path for the report (not mandatory) *
 
 ```{r, echo = TRUE, eval=FALSE}
 # Example of function calling
@@ -443,6 +447,9 @@ It requires the following parameters:
 
 - ***path***: *The full path (name included) where you want to save the plot.*
 *Remember to add the .html extension to the plot!*
+
+If no path is provided, the report will be generated in a temporary directory (
+use *tempdir()* to see which one.
 
 ```{r}
 # Execute the function

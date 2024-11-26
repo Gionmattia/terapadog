@@ -22,8 +22,7 @@
 #' )
 #' result <- plotDTA(df)
 #' @export
-#'
-plotDTA <- function(FC_results, path = paste0(tempdir(), "/plot.html") {
+plotDTA <- function(FC_results, path = paste0(tempdir(), "/plot.html")) {
   # Filters out omitted RegModes
   df <- FC_results %>%
     dplyr::filter(!(!!dplyr::sym("RegMode") %in% c("Undeterminable", "Undetermined")))
