@@ -1,7 +1,7 @@
 Package: terapadog
 Type: Package
 Title: Translational Efficiency Regulation Analysis using the PADOG Method
-Version: 0.99.0
+Version: 0.99.1
 Authors@R: person("Gionmattia", "Carancini",
             email = "gionmattia@gmail.com",
             role = c("cre", "aut"),
@@ -17,7 +17,7 @@ License: GPL-2
 Encoding: UTF-8
 LazyData: TRUE
 Imports: DESeq2, KEGGREST, stats, utils, dplyr, plotly, htmlwidgets, biomaRt, methods
-Suggests: apeglm, BiocStyle, knitr, rmakrkdown
+Suggests: apeglm, BiocStyle, knitr, rmarkdown
 Collate: preprocessing_helpers.R id_converter.R prepareTerapadogData.R terapadog.R get_FCs.R assign_Regmode.R plotDTA.R 
 biocViews: RiboSeq, Transcriptomics, GeneSetEnrichment, GeneRegulation, 
     Reactome, Software
