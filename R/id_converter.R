@@ -10,8 +10,10 @@
 #' gene Ids (gene symbol or ensembl gene ID).
 #' @param id_type A string representing the type of ID given as input. Must be
 #' either hgnc_symbol or ensembl_gene_id.
+#' @param save_report A boolean. By default, the duplicates report is not saved locally.
 #' @param outdir Path to a directory where to save the report. If none is given,
-#' a temporary directory will be chosen.
+#' a temporary directory will be chosen. No report will be creatted if save_report is
+#' set to FALSE.
 #' @return A matrix with gene IDs in the entrezgene_id format. Also provides a
 #' report on the duplicated mappings (conversion_report.txt) in the working dir.
 #' @examples
@@ -28,47 +30,67 @@
 #' esetm <- id_converter(esetm, "ensembl_gene_id")
 #' print(head(esetm))
 #' @export
-id_converter <- function(esetm, id_type, outdir = tempdir()) {
+id_converter <- function(esetm, id_type, save_report = FALSE, outdir = tempdir()) {
 
   if (!(id_type %in% c("hgnc_symbol", "ensembl_gene_id"))) {
     stop("Error: the conversion script only works with
          'hgnc_symbol' or 'ensembl_gene_id'")
   }
 
-  # Use the Ensembl database
-  mart <- biomaRt::useMart("ensembl", dataset = "hsapiens_gene_ensembl")
-
   # The IDs to map are the row names of esetm
   ids <- rownames(esetm)
 
-  # Get the mapping between the given IDs and Entrez Gene IDs
-  gene_mapping <- biomaRt::getBM(
-    filters = id_type,
-    attributes = c(id_type, "entrezgene_id"),
-    values = ids,
-    mart = mart
-  )
+  # Tries to get the mapping between the given IDs and Entrez Gene IDs
+
+  gene_mapping <- tryCatch({
+    # Use the Ensembl database
+    mart <- biomaRt::useMart("ensembl", dataset = "hsapiens_gene_ensembl")
+    # Get the conversion table from biomaRt
+    biomaRt::getBM(
+      filters = id_type,
+      attributes = c(id_type, "entrezgene_id"),
+      values = rownames(esetm),
+      mart = mart
+    )
+  }, error = function(e) {
+    message("Warning: Ensembl query failed. Using local conversion table instead.")
+    return(NULL)
+  })
+
+  # If Ensembl failed (server could be down), load the pre-downloaded conversion table
+  if (is.null(gene_mapping)) {
+
+    data_path <- system.file("extdata", "hsapiens_GRCh38.p14_gene_mapping.csv.gz", package = "terapadog")
+  if (!file.exists(data_path)) {
+    stop("Error: Ensembl is unavailable and local mapping file is missing. Cannot proceed.")
+  }
+
+  gene_mapping <- utils::read.csv(gzfile(data_path), stringsAsFactors = FALSE)
+  message("Warning: Ensembl might be down. Using local gene ID mapping table. Version: hsapiens_GRCh38.p14, 05/02/2025")
+}
 
   # Extract the duplicated mappings (one entrezgene_id could map to more ids)
   duplicates_mask <- duplicated(gene_mapping$entrezgene_id) | duplicated(gene_mapping$entrezgene_id, fromLast = TRUE)
   duplicated_rows <- gene_mapping[duplicates_mask, ]
   duplicated_rows <- duplicated_rows[!is.na(duplicated_rows$entrezgene_id), ]
-  # Write them to a report for transparency
-  report_message <- paste0(
-    "These are the input Ids mapping to the same entrezgene_id. ",
-    "NA values (no mapping) have been removed. Be aware that the counts from ",
-    "multiple mappings have been aggregated (summed) together under the same ",
-    "entrezgene_id for the purpose of the 'terapadog' analysis. ",
-    nrow(duplicated_rows), " duplicates found:"
-  )
 
-  # Write the explanation to a file
-  report_path <- paste0(outdir,"/conversion_report.txt")
-  writeLines(report_message, report_path)
-  # Append the table to the file
-  write.table(duplicated_rows, report_path, append = TRUE,
-              sep = ",", row.names = FALSE, col.names = TRUE)
+  # Write them to a report for transparency, if save_report = TRUE
+  if (save_report ==  TRUE) {
+    report_message <- paste0(
+      "These are the input Ids mapping to the same entrezgene_id. ",
+      "NA values (no mapping) have been removed. Be aware that the counts from ",
+      "multiple mappings have been aggregated (summed) together under the same ",
+      "entrezgene_id for the purpose of the 'terapadog' analysis. ",
+      nrow(duplicated_rows), " duplicates found:"
+      )
+    # Write the explanation to a file
 
+    report_path <- file.path(outdir,"conversion_report.txt")
+    writeLines(report_message, report_path)
+    # Append the table to the file
+    write.table(duplicated_rows, report_path, append = TRUE, sep = ",",
+                row.names = FALSE, col.names = TRUE)
+    }
   # Create a named vector for mapping
   id_to_entrez <- stats::setNames(gene_mapping$entrezgene_id, gene_mapping[[id_type]])
 
@@ -83,9 +105,6 @@ id_converter <- function(esetm, id_type, outdir = tempdir()) {
 
   # Aggregate the multiple mappings (duplicates) under the same entrezgene_id
   esetm <- rowsum(esetm, group = rownames(esetm))
-
-  # Remove duplicates (if any) maybe not necessary
-  # esetm <- esetm[!duplicated(rownames(esetm)), ]
 
   return(esetm)
 }

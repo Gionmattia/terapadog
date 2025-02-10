@@ -7,14 +7,22 @@ That is to say, a plot of the genes undergoing translational regulation,
 coloured by RegMode.
 Genes whose RegMode was Undeterminable or Undetermined are omitted.}
 \usage{
-plotDTA(FC_results, path = paste0(tempdir(), "/plot.html"))
+plotDTA(
+  FC_results,
+  save_plot = FALSE,
+  path = file.path(tempdir(), "plot.html")
+)
 }
 \arguments{
-\item{FC_results}{A matrix containing the counts from RNA and RIBO
+\item{FC_results}{A dataframe containing the counts from RNA and RIBO
 samples.}
 
+\item{save_plot}{Boolean. Default is FALSE. If TRUE, will save plot to a specified
+directory or a temporary one if none are given.}
+
 \item{path}{A string, pointing to where to save the html plot. If none is
-given, the plot will be saved to a temporary directory.}
+given, the plot will be saved to a temporary directory. This parameter will be
+ignored if save_plot is set to FALSE.}
 }
 \value{
 An interactive html plot.

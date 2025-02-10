@@ -287,6 +287,9 @@ use *tempdir()* to see which one.
 -   *A string representing the type of ID given as input. Either "hgnc_symbol" *
     *or "ensembl_gene_id".*
     
+-   *A boolean, to specify whether to save the report on duplicates or not.* 
+    *FALSE by default.*
+    
 -   *The output path for the report (not mandatory) *
 
 ```{r, echo = TRUE, eval=FALSE}
@@ -411,6 +414,11 @@ It requires the following parameters:
 *the "Block" column of your metadata (see section 3.1 of the vignette)*
 
 ```{r}
+# Loads apeglm
+# Check and load apeglm
+if (!requireNamespace("apeglm", quietly = TRUE)) {
+  stop("The package 'apeglm' is required to run this vignette. Please install it using BiocManager::install('apeglm').")
+}
 # Execute the analysis
 fc_results <- get_FCs(expression.data, exp_de)
 
@@ -444,7 +452,8 @@ they would clutter the plot without adding any value to it.
 It requires the following parameters:
 
 - ***FC_results***: *The results of the get_FCs function.*
-
+- ***save_plot***: *Boolean. Default is FALSE. If set to TRUE, it will evaluate 
+"path" (see below) to save the plot.*
 - ***path***: *The full path (name included) where you want to save the plot.*
 *Remember to add the .html extension to the plot!*
 
@@ -453,7 +462,7 @@ use *tempdir()* to see which one.
 
 ```{r}
 # Execute the function
-plot_FCs <- plotDTA(fc_results, paste0(getwd(), "/manual_example.html"))
+plot_FCs <- plotDTA(fc_results)
 ```
 
 # References

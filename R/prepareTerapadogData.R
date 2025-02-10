@@ -39,16 +39,48 @@ prepareTerapadogData <- function (path_to_RNA_counts, path_to_RIBO_counts,
                                   path_to_metadata,
                                   analysis.group.1, analysis.group.2) {
 
+  # ---- Input Checks ---- #
+  # Check existence of files given as input
+  if (!file.exists(path_to_RNA_counts)) stop("RNA counts file does not exist: ", path_to_RNA_counts)
+  if (!file.exists(path_to_RIBO_counts)) stop("RIBO counts file does not exist: ", path_to_RIBO_counts)
+  if (!file.exists(path_to_metadata)) stop("Metadata file does not exist: ", path_to_metadata)
+
+  # ---- ---- #
+
+
   # Read the file using the detected separator
   RNA_counts <- utils::read.table(path_to_RNA_counts, sep = detect_separator(
     path_to_RNA_counts), header = TRUE)
   RIBO_counts <- utils::read.table(path_to_RIBO_counts, sep = detect_separator(
     path_to_RIBO_counts), header = TRUE)
 
+  # Read the metadata
+  metadata <- utils::read.table(path_to_metadata, sep = detect_separator(
+    path_to_metadata), header = TRUE)
+
+  # ---- Medatata Formatting Checks ---- #
+  # Checks required columns are present in metadata file
+  required_columns <- c("SampleName", "Condition")
+  missing_cols <- setdiff(required_columns, colnames(metadata))
+  if (length(missing_cols) > 0) {
+    stop("Metadata file is missing required columns: ", paste(missing_cols, collapse = ", "))
+  }
+  # Check that analysis.group.1 and analysis.group.2 are actually in metadata
+  unique_conditions <- unique(metadata$Condition)
+  if (!(analysis.group.1 %in% unique_conditions) | !(analysis.group.2 %in% unique_conditions)) {
+    stop("analysis.group.1 or analysis.group.2 do not match Condition values available in Sample_info file.")
+  }
+
+  # ---- ---- #
+
+  # Check if dataframes are empty (no rows, no columns, or NULL)
+  check_input_df(RNA_counts)
+  check_input_df(RIBO_counts)
+
   # Check colnames are matching
   check_matching_colnames(RNA_counts, RIBO_counts)
 
-  # Check range of data, if not stop and error.
+  # Check range of data, if normalised between o and 1, stops execution.
   check_value_range(RNA_counts)
   check_value_range(RIBO_counts)
 
@@ -77,9 +109,7 @@ prepareTerapadogData <- function (path_to_RNA_counts, path_to_RIBO_counts,
 
   # Create exp_de by putting together SampleID, SampleName, SeqType
   exp_de <- data.frame(SampleID, SampleName, SeqType)
-  # Read the metadata, assign Group to exp_de based on value of SampleName
-  metadata <- utils::read.table(path_to_metadata, sep = detect_separator(
-    path_to_metadata), header = TRUE)
+  # Assign Group/Condition to exp_de based on value of SampleName in metadata
   exp_de$Condition <- metadata$Condition[match(exp_de$SampleName, metadata$SampleName)]
   # If there is info on paired design (Block column) add it to the dataframe
   if ("Block" %in% colnames(metadata)) {

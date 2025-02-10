@@ -36,12 +36,62 @@
 #'
 get_FCs <- function(expression.data, exp_de, paired = FALSE) {
 
-  # DeltaTE cannot manage NA among the levels of a factor, so I need to remove them! (code same as above)
+
+  # ---- Initial Input Validation -  BEFORE NA Removal ---- #
+
+  # Check for NULL inputs
+  if (is.null(expression.data) || is.null(exp_de)) {
+    stop("expression.data or exp_de cannot be NULL.")
+  }
+
+  # Check exp_de has required column names. If paired = TRUE, also checks for "Block"
+  if (paired == FALSE) {
+    required_columns <- c("SampleID", "SeqType", "Group")
+  } else if (paired == TRUE) {
+    required_columns <- c("SampleID", "SeqType", "Group", "Block")
+  }
+  missing_columns <- setdiff(required_columns, colnames(exp_de))
+  if (length(missing_columns) > 0) {
+    stop("exp_de is missing required columns: ", paste(missing_columns, collapse = ", "))
+  }
+
+  # ---- ---- #
+
+
+  # NA Removal - DeltaTE cannot manage NA among the levels of a factor (Group)
+  # The presence of NA is intentional: users might want to exclude some samples from comparison groups, hence why "NA"
   na_samples <- exp_de$SampleID[is.na(exp_de$Group)]
   # Remove the NA samples from exp_de
   exp_de <- exp_de[!exp_de$SampleID %in% na_samples, ]
-  # Remove NA samples from expression.data
+  # Remove NA samples from expression.data as well
   expression.data <- expression.data[, !colnames(expression.data) %in% na_samples, drop = FALSE]
+
+
+  # ---- Input Validation - AFTER NA Removal ---- #
+
+  # Check if exp_de is empty after NA removal
+  if (nrow(exp_de) == 0) {
+    stop("exp_de cannot be empty.")
+  }
+
+  # Check samples in exp_de match samples in expression.data
+  if (!setequal(colnames(expression.data), exp_de$SampleID)) {
+    stop("The SampleID (colnames(expression.data)) must match the SampleID values in exp_de.")
+  }
+
+  # check if exp_de has not two values for Group.
+  if (length(unique(exp_de$Group)) != 2) {
+    stop("exp_de must contain two levels for Group - The differential analysis requires to compare two groups only, not more nor less.")
+  }
+
+  # for paired analysis, checks there are more than one "Block"
+  # If paired = TRUE, check for more than one unique block
+  if (paired && length(unique(exp_de$Block)) < 2) {
+    stop("When paired = TRUE, exp_de must contain more than one level for Block.")
+  }
+
+  # ---- ---- #
+
 
   if (paired == TRUE) {
     design_TE <- ~ Block + Group + SeqType + Group:SeqType
@@ -138,6 +188,7 @@ get_FCs <- function(expression.data, exp_de, paired = FALSE) {
 
   # Reorder columns
   col_order <- c("Identifier", colnames(res_combined)[1:ncol(res_combined)])
+
 
 return(res_combined[, col_order])
 }

@@ -15,11 +15,13 @@ Description: This package performs a Gene Set Analysis with the approach adopted
     pathways and directionality of the change.
 License: GPL-2
 Encoding: UTF-8
-LazyData: TRUE
+LazyData: FALSE
 Imports: DESeq2, KEGGREST, stats, utils, dplyr, plotly, htmlwidgets, biomaRt, methods
-Suggests: apeglm, BiocStyle, knitr, rmarkdown
+Suggests: apeglm, BiocStyle, knitr, rmarkdown, testthat
 Collate: preprocessing_helpers.R id_converter.R prepareTerapadogData.R terapadog.R get_FCs.R assign_Regmode.R plotDTA.R 
 biocViews: RiboSeq, Transcriptomics, GeneSetEnrichment, GeneRegulation, 
     Reactome, Software
 RoxygenNote: 7.3.2
 VignetteBuilder: knitr
+URL: https://github.com/Gionmattia/terapadog
+BugReports: https://github.com/Gionmattia/terapadog/issues

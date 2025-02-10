@@ -7,10 +7,13 @@
 #' @importFrom dplyr %>% filter sym
 #' @importFrom plotly plot_ly layout
 #' @importFrom htmlwidgets saveWidget
-#' @param FC_results A matrix containing the counts from RNA and RIBO
+#' @param FC_results A dataframe containing the counts from RNA and RIBO
 #' samples.
+#' @param save_plot Boolean. Default is FALSE. If TRUE, will save plot to a specified
+#' directory or a temporary one if none are given.
 #' @param path A string, pointing to where to save the html plot. If none is
-#' given, the plot will be saved to a temporary directory.
+#' given, the plot will be saved to a temporary directory. This parameter will be
+#' ignored if save_plot is set to FALSE.
 #' @return An interactive html plot.
 #' @examples
 #' # Creates a mock dataframe for this demonstration
@@ -22,7 +25,20 @@
 #' )
 #' result <- plotDTA(df)
 #' @export
-plotDTA <- function(FC_results, path = paste0(tempdir(), "/plot.html")) {
+plotDTA <- function(FC_results, save_plot = FALSE, path = file.path(tempdir(), "plot.html")) {
+
+  # Input validation - FC_results is not NULL
+  if (!is.data.frame(FC_results)) {
+    stop("FC_results must be a dataframe")
+  }
+  # Input validation - FC_results has required columns
+  required_columns <- c("Identifier", "RegMode", "RNA_FC", "RIBO_FC")
+  missing_columns <- setdiff(required_columns, colnames(FC_results))
+  if (length(missing_columns) > 0) {
+    stop("FC_results is missing required columns: ", paste(missing_columns, collapse = ", "))
+  }
+
+
   # Filters out omitted RegModes
   df <- FC_results %>%
     dplyr::filter(!(!!dplyr::sym("RegMode") %in% c("Undeterminable", "Undetermined")))
@@ -53,7 +69,14 @@ plotDTA <- function(FC_results, path = paste0(tempdir(), "/plot.html")) {
       paper_bgcolor = "#FFFFFF"
     )
 
-  htmlwidgets::saveWidget(plot, path)
+  if (isTRUE(save_plot)) {
+    dir_path <- dirname(path)
+    if (!dir.exists(dir_path)) {
+      stop("The specified directory does not exist: ", dir_path)
+    }
+    htmlwidgets::saveWidget(plot, path)
+  }
+
   return(plot)
 
 }

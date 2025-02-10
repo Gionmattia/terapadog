@@ -87,8 +87,7 @@ terapadog <- function (esetm = NULL, exp_de = NULL, paired = FALSE,
   stopifnot(all(!duplicated(rownames(esetm))))
   stopifnot(sum(rownames(esetm) %in% allGallP) > 10)
   if (verbose) {
-    cat(paste0("Starting with ", length(gslist), " gene sets!"))
-    cat("\n")
+    message("Starting with ", length(gslist), " gene sets!")
   }
   gslist <- gslist[unlist(lapply(gslist, function(x) {
     length(intersect(rownames(esetm), x)) >= Nmin
@@ -96,8 +95,7 @@ terapadog <- function (esetm = NULL, exp_de = NULL, paired = FALSE,
   gs.names <- gs.names[names(gslist)]
   stopifnot(length(gslist) >= 3)
   if (verbose) {
-    cat(paste0("Analyzing ", length(gslist), " gene sets with ", Nmin, " or more genes!"))
-    cat("\n")
+    message("Analyzing ", length(gslist), " gene sets with ", Nmin, " or more genes!")
   }
 
   # Here starts what was modified more heavily.
@@ -202,7 +200,7 @@ terapadog <- function (esetm = NULL, exp_de = NULL, paired = FALSE,
 
   NI <- ncol(combidx)
   if (verbose) {
-    cat("# of permutations used:", NI, "\n")
+    message("# of permutations used:", NI)
   }
 
   deINgs <- intersect(rownames(esetm), unlist(gslist))
@@ -274,7 +272,7 @@ terapadog <- function (esetm = NULL, exp_de = NULL, paired = FALSE,
     MSabsT[, ite] <- Sres[1, ]
     MSTop[, ite] <- Sres[2, ]
     if (verbose && (ite%%10 == 0)) {
-      cat(ite, "/", NI, "\n")
+      message(ite, "/", NI)
     }
   }
 

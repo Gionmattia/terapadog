@@ -3,5 +3,8 @@
 .RData
 .Ruserdata
 .DS_Store
-./terapadog/vignettes/manual_example.html
+/vignettes/manual_example.html
+/vignettes/terapadog_vignette.html
+/inst/script/extdata_info.html
+terapadog.BiocCheck/
 terapadog.Rproj

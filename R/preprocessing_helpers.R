@@ -26,6 +26,27 @@ detect_separator <- function (path) {
   return(separator)
 }
 
+#' Check if a data frame is not empty (no rows, no columns, or NULL)
+#'
+#' @param df1 A dataframe.
+#' @return NULL. Throws an error if df is empty or NULL.
+#' @examples
+#' #' # Internal function, code cannot be run from here.
+#' \dontrun{
+#' rna_df <- data.frame(Sample1 = c(1,2,3), Sample2 = c(1,2,3), Sample3 = c(1,2,3))
+#' check_input_df(rna_df)
+#' }
+#' @keywords internal
+check_input_df <- function(df1) {
+  if (is.null(df1)) {
+    stop("One of the input dataframes is NULL. Check again inputs")
+  }
+  if (any(dim(df1)) == 0) {
+    stop("One of input dataframes is empty (no rows or columns)")
+  }
+}
+
+
 
 
 #' Check if two data frames have the same column names
@@ -84,8 +105,7 @@ check_value_range <- function(df) {
 
   # If the range is between 0 and 1, data is likely normalised/scaled.
   if (range_diff <= 1) {
-    stop("Value range in the data is between 0 and 1.
-         Data submitted must be RAW COUNT DATA, not normalised or scaled!")}
+    stop("Value range in the data is between 0 and 1. Data submitted must be RAW COUNT DATA, not normalised or scaled!")}
 }
 
 #' Check and Convert Dataframe Columns to Integers

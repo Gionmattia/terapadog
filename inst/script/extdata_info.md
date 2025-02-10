@@ -41,3 +41,32 @@ The datasets where then manually modified as it follows:
 
 These operations were done only to illustrate users how an input file should be formatted and to help ease the learning curve for TERAPADOG.\
 See the original paper mentioned for additional information on the biological source of the data.
+
+# About the other data available in extdata
+
+## Unit Testing data
+In order to provide instances of wrong datasets for unit testing, two mock "sample_info" files were created:
+
+- ***test_sample_info_wrong.tsv***, in which the Condition column is empty.
+- ***test_sample_info_wrong_2.tsv***, in which the Condition column has levels that are not specified in the user query (3 and 4, instead of 1 and 2)
+
+## Local gene ID conversion table
+The file ***hsapiens_GRCh38p14_gene_mapping.csv*** contains a local conversion table, used by _id_converter()_ if the ensembl
+server appears to be down (getBM() function is unresponsive).
+
+This table contains the following fields: *hgnc_symbol*, *ensembl_gene_id*, and *entrezgene_id*, to allow for the conversion between the three IDs.
+
+The data was downloaded from ensembl (Human genes (GRCh38.p14), using the following function:
+
+'''
+
+mart <- biomaRt::useMart("ensembl", dataset = "hsapiens_gene_ensembl")
+
+conversion_table <- biomaRt::getBM(
+  attributes = c("hgnc_symbol", "ensembl_gene_id", "entrezgene_id"),
+  mart = mart
+)
+
+'''
+
+Please note that id_convrter(), by default, will try to use getBM() first, then raise a warning message and switch to this table instead.

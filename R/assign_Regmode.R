@@ -29,11 +29,26 @@
 assign_Regmode <- function(res_df) {
   # Function checks padj (the padj value for the TE change), the RIBO_padj (same but for the FC from Ribo-Seq counts)
   # and the RNA_padj (same as above, but for RNA FC).
+
+  # ---- Input Checks ---- #
+  # Check presence of required columns
+  required_columns <- c("Identifier", "padj", "RIBO_padj", "RNA_padj" , "log2FoldChange", "RIBO_FC", "RNA_FC")
+  missing_columns <- setdiff(required_columns, colnames(res_df))
+  if (length(missing_columns) > 0) {
+    stop("Input is missing required columns: ", paste(missing_columns, collapse = ", "))
+  }
+  # Empty dataframe - no rows case
+  if (nrow(res_df) == 0) {
+    stop("Input dataframe has no rows.")
+  }
+
+  # ---- ---- #
+
   res_df$RegMode <- NA
   res_df$RegModeExplicit <- NA
 
 
-  #Applying the "Forwarded" RegMode (genes regulated by mRNA abundance, with no signficant changes in Translational Efficiency)
+  #Applying the "Forwarded" RegMode (genes regulated by mRNA abundance, with no significant changes in Translational Efficiency)
   forwarded <- res_df$padj > 0.05 & res_df$RIBO_padj < 0.05 & res_df$RNA_padj < 0.05
   res_df$RegMode[forwarded] <- "Forwarded"
   # Checks directionality of FC and assigns a more "explicit" RegMode value
@@ -43,7 +58,7 @@ assign_Regmode <- function(res_df) {
   res_df$RegModeExplicit[down_forwarded] <- "(Down)regulated, driven by mRNA transcription only"
 
 
-  # Applying "Exclusive" RegMode (genes regulated by translation effiency, with no change in mRNA abundance.
+  # Applying "Exclusive" RegMode (genes regulated by translation efficiency, with no change in mRNA abundance.
   exclusive <- res_df$padj < 0.05 & res_df$RIBO_padj < 0.05 & res_df$RNA_padj > 0.05
   res_df$RegMode[exclusive] <- "Exclusive"
   # Checks directionality of FC and assigns a more "explicit" RegMode value
