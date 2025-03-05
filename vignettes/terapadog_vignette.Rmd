@@ -100,6 +100,35 @@ This section will guide you thorough the various steps of the analysis, using so
 
 [<https://github.com/SGDDNB/translational_regulation.git>]
 
+
+## Understanding the results
+
+This analysis walk-trough will give two outputs:
+
+- the ***terapadog()*** function will analyse the pathway enrichment for genes 
+that result to be undergoing translational regulation. This is the main output 
+of the function, which allows to understand if a particular pathway is actively 
+undergoing translational regulation.
+
+- the ***get_FCs()*** function (and ***plotDTA()***) will give a breakdown on
+*how* each single gene is being regulated (as per a classic DTA analysis). This
+is a more atomic perspective on the data, optional to end of a GSEA, but which 
+has been included to further contextualize the results obtained.
+
+Intuitively, no output is better than the other. These are just two different 
+ways to inspect the data and draw insights. Some users might find more intuitive
+to just have a high-level overview of the pathways undergoing translational 
+regulation (terapadog() output), others might want to inspect the results from a 
+single-gene perspective (get_FCs()). Some might find tables intimidating and 
+might want to result to graphical representations (plotting the results of the 
+latter with plotDTA().
+
+One of the aims of this package is to empower users to analyse the data, but it 
+is also fundamental to remember that it has been conceived as an integration to 
+the ReactomeGSA backend, so to leverage on their advanced visualisations (not to
+be an alternative to it!)
+
+
 ## Input data: Formatting and Extension
 
 First thing first, terapadog requires **raw gene counts** as input data. 
@@ -353,15 +382,18 @@ required to perform the analysis.
 *In the context of an independent user, only the first two (or three if the* 
 *samples are paired) should be enough to run the analysis!*
 
-Since running terapadog can be computationally intesive, only a non-runnable 
-example of the code will be provided:
+Since running terapadog() can be computationally intensive and time-consuming, this
+vignette will provide a non-evaluate example of calling the function (though the 
+correctness of the full function is tested within the *test-terapadog.R* unit tests)
+An example of the results (*"terapadog_res_example.csv"*) is still available 
+within the package and is partially loaded below for inspection.
 
 ```{r, echo = TRUE, eval=FALSE}
-# Calling terapadog
+# Calling terapadog.
 results <- terapadog(esetm = expression.data, exp_de = exp_de)
 ```
 
-The final result of the analysis is a data frame with the following columns:
+The final result of the analysis is a data frame, with the following columns:
 
 - *Name*. The name of the gene set (pathway), as retrieved from KEGG.
 - *ID*. The Id of said pathway.
@@ -379,6 +411,14 @@ calculated through permutation testing (before applying the weighting scheme).
 - *Ppadog*. This is the p-value corresponding to the PADOG statistic (padog0), 
 calculated via permutation testing.
 
+```{r}
+# Load the example of terapadog results from the library
+example <- system.file("extdata", "terapadog_res_example.csv", 
+                                    package = "terapadog")
+res_example <- read.table(example)
+print(head(res_example))
+```
+
 These results are the same of the PADOG algorithm, though it is important to 
 remind that terapadog uses the padj instead of the T0 in its internal calculations
 (due to the design of the implementation with DeltaTE), so some ranges (for those 
@@ -392,7 +432,7 @@ look at the padog0 score (higher = enriched) and at the Ppadog for the significa
 
 ## **get_FCs()**
 
-This functions perform the Differential Translation Analysis (DTA) on its own.
+This functions perform a classic Differential Translation Analysis (DTA).
 It allows the user to see how each gene is regulated in terms of TE and RNA fold
 changes, while also categorizing each gene into a different Regulatory Mode.
 It requires the following parameters:

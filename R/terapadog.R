@@ -35,247 +35,79 @@ terapadog <- function (esetm = NULL, exp_de = NULL, paired = FALSE,
                        gslist = "KEGGRESTpathway", organism = "hsa" ,
                        gs.names = NULL, NI = 1000, Nmin = 3, verbose = TRUE) {
 
-  # Initial checks on the data (as PADOG would do). Some have been modified/removed to fit new kind of data.
-  if (length(gslist) == 1 && gslist == "KEGGRESTpathway") {
-    stopifnot(nchar(organism) == 3)
-    res <- KEGGREST::keggLink("pathway", organism)
-    a <- data.frame(path = gsub(paste0("path:", organism),"", res),
-                    gns = gsub(paste0(organism, ":"),"", names(res)))
-    gslist <- tapply(a$gns, a$path, function(x) {
-      as.character(x)
-    })
-    gs.names <- KEGGREST::keggList("pathway", organism)[paste0(organism, names(gslist))]
-    names(gs.names) <- names(gslist)
-    stopifnot(length(gslist) >= 3)
-    rm(res, a)
-  }
-  stopifnot(is.matrix(esetm))
-  stopifnot(all(dim(esetm) > 4))
-  stopifnot(mode(gslist) == "list")
-  stopifnot(length(gslist) >= 3)
+  ####### UNIT TESTING - checks on inputs #####
+  if (!is.matrix(esetm)) stop("Error: esetm must be a matrix")
+  if (!all(dim(esetm) > 4)) stop("Error: esetm must have dimensions greater than 4")
+  if (!is.numeric(NI)) stop("Error: NI must be numeric")
+  if (!(NI > 5)) stop("Error: NI must be greater than 5")
+  if (any(duplicated(rownames(esetm)))) stop("Error: Duplicate row names found in esetm")
 
-  if (!is.null(gs.names)) {
-    stopifnot(length(gslist) == length(gs.names))
-  }
-  stopifnot(is(NI, "numeric"))
-  stopifnot(NI > 5)
-  stopifnot(sum(rownames(esetm) %in% as.character(unlist(gslist))) >
-                10 & !any(duplicated(rownames(esetm))))
 
-  # Initial operations on the gene set lists. Unchanged from PADOG.
-  gf <- table(unlist(gslist))
-  if (!(stats::var(gf) == 0)) {
-    if (stats::quantile(gf, 0.99) > mean(gf) + 3 * stats::sd(gf)) {
-      gf[gf > stats::quantile(gf, 0.99)] <- stats::quantile(gf, 0.99)
-    }
-    gff <- function(x) {
-      1 + ((max(x) - x)/(max(x) - min(x)))^0.5
-    }
-    gf <- gff(gf)
-  }
-  else {
-    fdfd <- unique(unlist(gslist))
-    gf <- rep(1, length(fdfd))
-    names(gf) <- fdfd
-  }
-  allGallP <- unique(unlist(gslist))
+  # First function call - retrieving gene set info and calculating weights
+  geneSets <- terapadog:::prepareGeneSets(esetm, gslist, organism, gs.names,
+                                          Nmin, verbose)
+  # Extracting results
+  gslist <- geneSets$gslist
+  gs.names <- geneSets$gs.names
+  gf <- geneSets$gf
 
-  restg <- setdiff(rownames(esetm), names(gf))
-  appendd <- rep(1, length(restg))
-  names(appendd) <- restg
-  gf <- c(gf, appendd)
-  stopifnot(all(!duplicated(rownames(esetm))))
-  stopifnot(sum(rownames(esetm) %in% allGallP) > 10)
-  if (verbose) {
-    message("Starting with ", length(gslist), " gene sets!")
-  }
-  gslist <- gslist[unlist(lapply(gslist, function(x) {
-    length(intersect(rownames(esetm), x)) >= Nmin
-  }))]
-  gs.names <- gs.names[names(gslist)]
-  stopifnot(length(gslist) >= 3)
-  if (verbose) {
-    message("Analyzing ", length(gslist), " gene sets with ", Nmin, " or more genes!")
-  }
-
-  # Here starts what was modified more heavily.
-
-  # This section groups matching RNA and RIBO samples under a single index
-  # (to keep the pair together during permutations).
+  # This section groups matching RNA and RIBO samples under a single index (to keep the pair together during permutations).
 
   # Orders matching RIBO and RNA samples by the SampleName value (which is provided by the user when submitting data)
   exp_de_ordered <- exp_de[do.call(order, exp_de["SampleName"]),]
-
   # Retrieves the indexes (from exp_de) for each RNA and matching RIBO Sample.
   ordered_indexes <- rownames(exp_de_ordered)
   grouped_indexes <- as.data.frame(matrix(ordered_indexes, ncol = 2, byrow = TRUE))
-
-  # Adds to the dataframe info on the Group for each couple of indices
+  # Adds to the data frame info on the Group for each couple of indices
   grouped_indexes$Group <- exp_de_ordered[exp_de_ordered$SeqType != "RIBO", ]$Group
-
+  # Sets block to NULL
   block <- NULL
+  # If the study has a paired experimental design, reassigns block
   if (paired) {
     # Retrieves the info for paired samples from the dataframe
     grouped_indexes$Block <- exp_de_ordered[exp_de_ordered$SeqType != "RIBO", ]$Block
     block <- factor(grouped_indexes$Block)
   }
 
+
   # Extracts the group vector from the dataframe, to use it for permutations as PADOG does
   group <- grouped_indexes$Group
+  G <- factor(group)
 
-  # Global variables
-
-  G <- factor(group) # creates a vector of factors ("c" or "d" in riboNAV)
-  Glen <- length(G) # number of samples (since each factor is tied to a sample)
-  tab <- table(G) # counts frequency for each factor
-  idx <- which.min(tab) # finds factors with least number of samples assigned
-  minG <- names(tab)[idx] # retrieve its name
-  minGSZ <- tab[idx] # retrieves number of samples assigned to it
-  bigG <- rep(setdiff(levels(G), minG), length(G))
-
-  # topSigNum <- dim(esetm)[1]
-
-  # Creates all the possible "group" label permutations for the given data.
-  combFun <- function(gi, countn = TRUE) {
-    g <- G[gi]
-    tab <- table(g)
-    if (countn) {
-      minsz <- min(tab)
-      ifelse(minsz > 10, -1, choose(length(g), minsz))
-    }
-    else {
-      dup <- which(g == minG)
-      cms <- utils::combn(length(g), tab[minG])
-      del <- apply(cms, 2, setequal, dup)
-      if (paired) {
-        cms <- cms[, order(del, decreasing = TRUE), drop = FALSE]
-        cms[] <- gi[c(cms)]
-        cms
-      }
-      else {
-        cms[, !del, drop = FALSE]
-      }
-    }
-  }
+  # Creates permutations matrix, retrieves least and most abundant levels for G, and recomputes iterations (NI) needed
+  permutations_info <- terapadog:::generate_permutation_matrix(G, NI, paired,
+                                                               block, verbose)
+  # Extracts results
+  minG <- permutations_info$minG
+  bigG <- permutations_info$bigG
+  combidx <- permutations_info$combidx
+  NI <- permutations_info$NI
 
 
-  if (paired) {
-    bct <- tapply(seq_along(G), block, combFun, simplify = TRUE)
-    nperm <- ifelse(any(bct < 0), -1, prod(bct))
-    if (nperm < 0 || nperm > NI) {
-      btab <- tapply(seq_along(G), block, `[`, simplify = FALSE)
-      bSamp <- function(gi) {
-        g <- G[gi]
-        tab <- table(g)
-        bsz <- length(g)
-        minsz <- tab[minG]
-        cms <- do.call(cbind, replicate(NI, sample.int(bsz,
-                                                       minsz), simplify = FALSE))
-        cms[] <- gi[c(cms)]
-        cms
-      }
-      combidx <- do.call(rbind, lapply(btab, bSamp))
-    }
-    else {
-      bcomb <- tapply(seq_along(G), block, combFun, countn = FALSE,
-                      simplify = FALSE)
-      colb <- expand.grid(lapply(bcomb, function(x) 1:ncol(x)))[-1,
-                                                                , drop = FALSE]
-      combidx <- mapply(function(x, y) x[, y, drop = FALSE],
-                        bcomb, colb, SIMPLIFY = FALSE)
-      combidx <- do.call(rbind, combidx)
-    }
-  }
-  else {
-    # Checks number of permutations that would be created. Must be >0 and < 1000
-    nperm <- combFun(seq_along(G))
-    if (nperm < 0 || nperm > NI) {
-      combidx <- do.call(cbind, replicate(NI, sample.int(Glen,
-                                                         minGSZ), simplify = FALSE))
-    } else {
-      # If nperm is acceptable, then permutation matrix combidx is generated (is the product of "cms" of combFun)
-      combidx <- combFun(seq_along(G), countn = FALSE)
-    }
-  }
-
-  NI <- ncol(combidx)
-  if (verbose) {
-    message("# of permutations used:", NI)
-  }
-
+  # Filter. Contains genes that are both in the gene sets, as well in esetm
   deINgs <- intersect(rownames(esetm), unlist(gslist))
+  # For each gene in gslist, check ID against deINGs.
+  # Results in a list where each gene set contains indexes corresponding to genes existing both in gslist and esetm.
   gslistINesetm <- lapply(gslist, match, table = deINgs, nomatch = 0)
-  MSabsT <- MSTop <- matrix(NA, length(gslistINesetm), NI +
-                              1)
+  # Preparing variables to store results of iterations
+  MSabsT <- MSTop <- matrix(NA, length(gslistINesetm), NI + 1)
 
-  gsScoreFun <- function(G, block) {
-    force(G) # Forces evaluation of G
-    force(block) # Forces evaluation of block
-
-    # This bit re-assigns the "group" label to the samples according to the combidx matrix, if past the first iteration
-
-    if (ite > 1) {
-      G <- bigG # Need to check the original PADOG for bigG
-      G[combidx[, ite - 1]] <- minG
-      G <- factor(G)
-
-      # Unpacks grouped_indexes, so to have "group" labels for each sample (RNA count and RIBO count) in a vector
-      for (i in seq_along(G)) {
-
-        # Get the new label from G
-        value <- as.character(G[i])
-
-        # Updates exp_de according to the retrieved indexes (from grouped_indexes) with the new "group" label
-        exp_de[grouped_indexes[i,]$V1, ]$Group <- value
-        exp_de[grouped_indexes[i,]$V2, ]$Group <- value
-      }
-    }
-
-    if (paired) {
-      design_TE <- ~ Block + Group + SeqType+ Group:SeqType # Paired designs do not have batch effect correction!
-    }
-    else { # Add if statement, if there is batch, then do this, else do not
-      design_TE <- ~ Group + SeqType+ Group:SeqType
-    }
-
-    # Setup the ddsMat object
-    ddsMat <- DESeq2::DESeqDataSetFromMatrix(
-      countData = esetm,
-      colData = exp_de,
-      design = design_TE
-    )
-
-    # Calculate results (without printing messages on console)
-    ddsMat <- suppressMessages(DESeq2::DESeq(ddsMat))
-
-    # Extract specific comparison of interest
-    res <- DESeq2::results(ddsMat, name = "Groupd.SeqTypeRIBO")
-
-    # originally, moderated t-values (abs value) were retrived and stored in a df.
-    # Now it just extracts adjusted p-values.
-    de <- res$padj
-    names(de) <- rownames(res)
-
-    # The scaling happens.
-    degf <- scale(cbind(de, de * gf[names(de)]))
-    rownames(degf) <- names(de)
-    degf <- degf[deINgs, , drop = FALSE]
-
-    sapply(gslistINesetm, function(z) {
-      X <- stats::na.omit(degf[z, , drop = FALSE])
-      colMeans(X, na.rm = TRUE) * sqrt(nrow(X))
-    })
-  }
-
+  # Calculates scores
   for (ite in 1:(NI + 1)) {
-    Sres <- gsScoreFun(G, block)
-    MSabsT[, ite] <- Sres[1, ]
-    MSTop[, ite] <- Sres[2, ]
+    Sres <- terapadog:::gsScoreFun(G, block, ite, exp_de, esetm, paired,
+                                   grouped_indexes, minG, bigG, gf, combidx,
+                                   deINgs, gslistINesetm)
+    # Extracts raw p-values
+    MSabsT[, ite] <- Sres["MeanAdjP", ]
+    # Extracts weighted p-values (gene set scores weighted down)
+    MSTop[, ite] <- Sres["WeightedAdjP", ]
+
     if (verbose && (ite%%10 == 0)) {
       message(ite, "/", NI)
     }
   }
 
+  # Extracts scores for real experiment
   meanAbsT0 <- MSabsT[, 1]
   padog0 <- MSTop[, 1]
   MSabsT <- scale(MSabsT)
@@ -293,7 +125,7 @@ terapadog <- function (esetm = NULL, exp_de = NULL, paired = FALSE,
   PSabsT[PSabsT == 0] <- 1/NI/100
   PSTop[PSTop == 0] <- 1/NI/100
 
-  # Removed part for plots
+  # Compiles the final result as a dataframe
   if (!is.null(gs.names)) {
     myn <- gs.names
   }
