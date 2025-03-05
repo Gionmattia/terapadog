@@ -85,9 +85,11 @@ test_that("terapadog runs without errors", {
   prepared_data <- prepareTerapadogData(rna_file, ribo_file, sample_file, "1", "2")
   # Unpacks the expression.data and exp_de from the output
   esetm <- prepared_data$expression.data
+  # Slices the data to reduce the computational costs of testing terapadog.
   exp_de <- prepared_data$exp_de
   # converts ids
   esetm <- id_converter(esetm, "ensembl_gene_id")
-  # runs terapadog with proper input
-  expect_silent(terapadog(esetm = esetm, exp_de = exp_de, verbose = FALSE))
+  # runs terapadog with reduced genes, iterations, and thresholds
+  # To evade bioconductor's timeout issues.
+  expect_silent(terapadog(esetm = esetm, exp_de = exp_de, NI = 7, Nmin = 2, verbose = FALSE))
 })
