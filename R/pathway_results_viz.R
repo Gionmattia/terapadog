@@ -130,16 +130,16 @@ get_gene_from_kegg_pathway <- function(fc_results,
 
 
 plot_pathway_changes <- function(fc_results,
-                                 pathway_id,
-                                 alpha_threshold = 0.05,
-                                 organism_prefix = "hsa") {
-
+                                  pathway_id,
+                                  alpha_threshold = 0.05,
+                                  organism_prefix = "hsa") {
+  
   # Input validation
   required_columns <- c("Identifier", "RNA_FC", "RNA_padj", "RIBO_FC",
-                         "RIBO_padj", "TE_FC",  "TE_padj")
+                        "RIBO_padj", "TE_FC",  "TE_padj")
   missing_columns <- setdiff(required_columns, colnames(fc_results))
   if (length(missing_columns) > 0) stop("The output for get_FCs() is required as input dataframe.")
-    # Check columns is formatted properly
+  # Check columns is formatted properly
   if (!is.numeric(fc_results[["Identifier"]]) &&
       !is.character(fc_results[["Identifier"]])) {
     stop("Error: The 'Identifier' column must be either numeric or a character string.")
@@ -148,14 +148,17 @@ plot_pathway_changes <- function(fc_results,
   if (!grepl("^[0-9]{1,5}$", pathway_id)) stop("Error: Provide a pathway ID as reported in the terapadog results. It's a number of 5 or less digits.")
   # Check organism prefix is correct
   if (!nchar(organism_prefix)==3) stop("Error: the organism prefix is a 3-letter acronym, like hsa")
-
+  
   pathway_id <- formatC(as.numeric(pathway_id), width = 5, flag = "0")
-
+  
+  # Set absolute limit for colours on pathways
+  global_max_fc <- max(abs(c(fc_results$RNA_FC, fc_results$RIBO_FC, fc_results$TE_FC)), na.rm = TRUE)
+  
   # Create mask for n.s. fold changes
   rna_not_sig <- fc_results$RNA_padj > alpha_threshold | is.na(fc_results$RNA_padj)
   ribo_not_sig  <- fc_results$RIBO_padj > alpha_threshold  | is.na(fc_results$RIBO_padj)
   te_not_sig <- fc_results$TE_padj > alpha_threshold  | is.na(fc_results$TE_padj)
-
+  
   # Extract values from results
   rna_fc <- fc_results$RNA_FC
   ribo_fc <- fc_results$RIBO_FC
@@ -164,11 +167,11 @@ plot_pathway_changes <- function(fc_results,
   names(rna_fc) <- fc_results$Identifier
   names(ribo_fc) <- fc_results$Identifier
   names(te_fc) <- fc_results$Identifier
-
+  
   rna_fc[rna_not_sig] <- 0
   ribo_fc[ribo_not_sig] <- 0
   te_fc[te_not_sig] <- 0
-
+  
   # Generate picture for RNA
   pv_rna <- pathview::pathview(
     gene.data   = rna_fc,
@@ -177,11 +180,12 @@ plot_pathway_changes <- function(fc_results,
     gene.idtype = "ENTREZ",
     multi.state = FALSE,
     out.suffix  = "terapadog_RNA_significant_Fold_Changes",
-    low  = list(gene = "gold", cpd = "blue"),
-    mid  = list(gene = "gray", cpd = "gray"),
-    high = list(gene = "blue", cpd = "yellow")
+    limit = list(gene = global_max_fc, cpd = 1),
+    low  = list(gene = "gold"),
+    mid  = list(gene = "floralwhite"),
+    high = list(gene = "blue3")
   )
-
+  
   # Generate Picture for RIBO
   pv_ribo <- pathview::pathview(
     gene.data   = ribo_fc,
@@ -190,11 +194,12 @@ plot_pathway_changes <- function(fc_results,
     gene.idtype = "ENTREZ",
     multi.state = FALSE,
     out.suffix  = "terapadog_RIBO_significant_Fold_Changes",
-    low  = list(gene = "gold", cpd = "blue"),
-    mid  = list(gene = "gray", cpd = "gray"),
-    high = list(gene = "blue", cpd = "yellow")
+    limit = list(gene = global_max_fc, cpd = 1),
+    low  = list(gene = "saddlebrown"),
+    mid  = list(gene = "floralwhite"),
+    high = list(gene = "darkcyan")
   )
-
+  
   # Generate Picture for TE
   pv_te <- pathview::pathview(
     gene.data   = te_fc,
@@ -203,10 +208,11 @@ plot_pathway_changes <- function(fc_results,
     gene.idtype = "ENTREZ",
     multi.state = FALSE,
     out.suffix  = "terapadog_TE_significant_Fold_Changes",
-    low  = list(gene = "gold", cpd = "blue"),
-    mid  = list(gene = "gray", cpd = "gray"),
-    high = list(gene = "blue", cpd = "yellow")
+    limit = list(gene = global_max_fc, cpd = 1),
+    low  = list(gene = "maroon"),
+    mid  = list(gene = "floralwhite"),
+    high = list(gene = "forestgreen")
   )
-
+  
 }
 
