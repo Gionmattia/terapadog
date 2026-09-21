@@ -114,6 +114,9 @@ get_gene_from_kegg_pathway <- function(fc_results,
 #' are considered non-significant.
 #' @param organism_prefix Character. The three-letter code for the organism
 #' of interest. default is H. sapiens ("hsa").
+#' @param gene_ID_type Character. The type of gene ID given to the function, 
+#' default is "ENTREZ". Can also be "ENSEMBL" or "REFSEQ"
+#' of interest. default is H. sapiens ("hsa").
 #' @return Saves three pictures in the working directory. Behaviour inherited
 #' by pathview. Changing the workdir changes the output directory.
 #' @examples
@@ -128,11 +131,11 @@ get_gene_from_kegg_pathway <- function(fc_results,
 #' }
 #' @export
 
-
 plot_pathway_changes <- function(fc_results,
                                   pathway_id,
                                   alpha_threshold = 0.05,
-                                  organism_prefix = "hsa") {
+                                  organism_prefix = "hsa",
+                                 gene_ID_type = "ENTREZ") {
   
   # Input validation
   required_columns <- c("Identifier", "RNA_FC", "RNA_padj", "RIBO_FC",
@@ -150,9 +153,6 @@ plot_pathway_changes <- function(fc_results,
   if (!nchar(organism_prefix)==3) stop("Error: the organism prefix is a 3-letter acronym, like hsa")
   
   pathway_id <- formatC(as.numeric(pathway_id), width = 5, flag = "0")
-  
-  # Set absolute limit for colours on pathways
-  global_max_fc <- max(abs(c(fc_results$RNA_FC, fc_results$RIBO_FC, fc_results$TE_FC)), na.rm = TRUE)
   
   # Create mask for n.s. fold changes
   rna_not_sig <- fc_results$RNA_padj > alpha_threshold | is.na(fc_results$RNA_padj)
@@ -172,12 +172,15 @@ plot_pathway_changes <- function(fc_results,
   ribo_fc[ribo_not_sig] <- 0
   te_fc[te_not_sig] <- 0
   
+  # Set absolute limit for colours on pathways
+  global_max_fc <- round(max(abs(c(rna_fc, ribo_fc, te_fc)), na.rm = TRUE))
+  
   # Generate picture for RNA
   pv_rna <- pathview::pathview(
     gene.data   = rna_fc,
     pathway.id  = pathway_id,
     species     = organism_prefix,
-    gene.idtype = "ENTREZ",
+    gene.idtype = gene_ID_type,
     multi.state = FALSE,
     out.suffix  = "terapadog_RNA_significant_Fold_Changes",
     limit = list(gene = global_max_fc, cpd = 1),
@@ -191,7 +194,7 @@ plot_pathway_changes <- function(fc_results,
     gene.data   = ribo_fc,
     pathway.id  = pathway_id,
     species     = organism_prefix,
-    gene.idtype = "ENTREZ",
+    gene.idtype = gene_ID_type,
     multi.state = FALSE,
     out.suffix  = "terapadog_RIBO_significant_Fold_Changes",
     limit = list(gene = global_max_fc, cpd = 1),
@@ -205,7 +208,7 @@ plot_pathway_changes <- function(fc_results,
     gene.data   = te_fc,
     pathway.id  = pathway_id,
     species     = organism_prefix,
-    gene.idtype = "ENTREZ",
+    gene.idtype = gene_ID_type,
     multi.state = FALSE,
     out.suffix  = "terapadog_TE_significant_Fold_Changes",
     limit = list(gene = global_max_fc, cpd = 1),
